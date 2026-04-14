@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageHtmlEmail.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Commons Email</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.mail</a> &gt; <span class="el_source">ImageHtmlEmail.java</span></div><h1>ImageHtmlEmail.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.mail;
+
+import javax.activation.DataSource;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Small wrapper class on top of HtmlEmail which encapsulates the required logic
+ * to retrieve images that are contained in &quot;&amp;lt;img src=../&amp;gt;&quot; elements in the HTML
+ * code. This is done by replacing all img-src-elements with &quot;cid:&quot;-entries and
+ * embedding images in the email.
+ * &lt;/br&gt;
+ * For local files the class tries to either load them via an absolute path or -
+ * if available - use a relative path starting from a base directory. For files
+ * that are not found locally, the implementation tries to download
+ * the element and link it in.
+ * &lt;/br&gt;
+ * The image loading is done by an instance of &lt;code&gt;DataSourceResolver&lt;/code&gt;
+ * which has to be provided by the caller.
+ * &lt;/br&gt;
+ *
+ * @since 1.3
+ * @version $Id: ImageHtmlEmail.java 1498625 2013-07-01 19:07:19Z tn $
+ */
+<span class="nc" id="L44">public class ImageHtmlEmail extends HtmlEmail</span>
+{
+    // Regular Expression to find all &lt;IMG SRC=&quot;...&quot;&gt; entries in an HTML
+    // document.It needs to cater for various things, like more whitespaces
+    // including newlines on any place, HTML is not case sensitive and there
+    // can be arbitrary text between &quot;IMG&quot; and &quot;SRC&quot; like IDs and other things.
+
+    /** regexp for extracting &lt;img&gt; tags */
+    public static final String REGEX_IMG_SRC =
+            &quot;(&lt;[Ii][Mm][Gg]\\s*[^&gt;]*?\\s+[Ss][Rr][Cc]\\s*=\\s*[\&quot;'])([^\&quot;']+?)([\&quot;'])&quot;;
+
+    /** regexp for extracting &lt;script&gt; tags */
+    public static final String REGEX_SCRIPT_SRC =
+            &quot;(&lt;[Ss][Cc][Rr][Ii][Pp][Tt]\\s*.*?\\s+[Ss][Rr][Cc]\\s*=\\s*[\&quot;'])([^\&quot;']+?)([\&quot;'])&quot;;
+
+    // this pattern looks for the HTML image tag which indicates embedded images,
+    // the grouping is necessary to allow to replace the element with the CID
+
+    /** pattern for extracting &lt;img&gt; tags */
+<span class="nc" id="L63">    private static final Pattern IMG_PATTERN = Pattern.compile(REGEX_IMG_SRC);</span>
+
+    /** pattern for extracting &lt;script&gt; tags */
+<span class="nc" id="L66">    private static final Pattern SCRIPT_PATTERN = Pattern.compile(REGEX_SCRIPT_SRC);</span>
+
+    /** resolve the images and script resources to a DataSource */
+    private DataSourceResolver dataSourceResolver;
+
+    /**
+     * Get the data source resolver.
+     *
+     * @return the resolver
+     */
+    public DataSourceResolver getDataSourceResolver()
+    {
+<span class="nc" id="L78">        return dataSourceResolver;</span>
+    }
+
+    /**
+     * Set the data source resolver.
+     *
+     * @param dataSourceResolver the resolver
+     */
+    public void setDataSourceResolver(DataSourceResolver dataSourceResolver)
+    {
+<span class="nc" id="L88">        this.dataSourceResolver = dataSourceResolver;</span>
+<span class="nc" id="L89">    }</span>
+
+     /**
+      * Does the work of actually building the MimeMessage.
+      *
+      * @see org.apache.commons.mail.HtmlEmail#buildMimeMessage()
+      * @throws EmailException building the MimeMessage failed
+      */
+    @Override
+    public void buildMimeMessage() throws EmailException
+    {
+        try
+        {
+            // embed all the matching image and script resources within the email
+<span class="nc" id="L103">            String temp = replacePattern(super.html, IMG_PATTERN);</span>
+<span class="nc" id="L104">            temp = replacePattern(temp, SCRIPT_PATTERN);</span>
+<span class="nc" id="L105">            setHtmlMsg(temp);</span>
+<span class="nc" id="L106">            super.buildMimeMessage();</span>
+        }
+<span class="nc" id="L108">        catch (IOException e)</span>
+        {
+<span class="nc" id="L110">            throw new EmailException(&quot;Building the MimeMessage failed&quot;, e);</span>
+<span class="nc" id="L111">        }</span>
+<span class="nc" id="L112">    }</span>
+
+    /**
+     * Replace the regexp matching resource locations with &quot;cid:...&quot; references.
+     *
+     * @param htmlMessage the HTML message to analyze
+     * @param pattern the regular expression to find resources
+     * @return the HTML message containing &quot;cid&quot; references
+     * @throws EmailException creating the email failed
+     * @throws IOException resolving the resources failed
+     */
+    private String replacePattern(final String htmlMessage, final Pattern pattern)
+            throws EmailException, IOException
+    {
+        DataSource dataSource;
+<span class="nc" id="L127">        StringBuffer stringBuffer = new StringBuffer();</span>
+
+        // maps &quot;cid&quot; --&gt; name
+<span class="nc" id="L130">        Map&lt;String, String&gt; cidCache = new HashMap&lt;String, String&gt;();</span>
+
+        // maps &quot;name&quot; --&gt; dataSource
+<span class="nc" id="L133">        Map&lt;String, DataSource&gt; dataSourceCache = new HashMap&lt;String, DataSource&gt;();</span>
+
+        // in the String, replace all &quot;img src&quot; with a CID and embed the related
+        // image file if we find it.
+<span class="nc" id="L137">        Matcher matcher = pattern.matcher(htmlMessage);</span>
+
+        // the matcher returns all instances one by one
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        while (matcher.find())</span>
+        {
+            // in the RegEx we have the &lt;src&gt; element as second &quot;group&quot;
+<span class="nc" id="L143">            String resourceLocation = matcher.group(2);</span>
+
+            // avoid loading the same data source more than once
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            if (dataSourceCache.get(resourceLocation) == null)</span>
+            {
+                // in lenient mode we might get a 'null' data source if the resource was not found
+<span class="nc" id="L149">                dataSource = getDataSourceResolver().resolve(resourceLocation);</span>
+
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                if (dataSource != null)</span>
+                {
+<span class="nc" id="L153">                    dataSourceCache.put(resourceLocation, dataSource);</span>
+                }
+            }
+            else
+            {
+<span class="nc" id="L158">                dataSource = dataSourceCache.get(resourceLocation);</span>
+            }
+
+<span class="nc bnc" id="L161" title="All 2 branches missed.">            if (dataSource != null)</span>
+            {
+<span class="nc" id="L163">                String name = dataSource.getName();</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                if (EmailUtils.isEmpty(name))</span>
+                {
+<span class="nc" id="L166">                    name = resourceLocation;</span>
+                }
+
+<span class="nc" id="L169">                String cid = cidCache.get(name);</span>
+
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                if (cid == null)</span>
+                {
+<span class="nc" id="L173">                    cid = embed(dataSource, dataSource.getName());</span>
+<span class="nc" id="L174">                    cidCache.put(name, cid);</span>
+                }
+
+                // if we embedded something, then we need to replace the URL with
+                // the CID, otherwise the Matcher takes care of adding the
+                // non-replaced text afterwards, so no else is necessary here!
+<span class="nc" id="L180">                matcher.appendReplacement(stringBuffer,</span>
+<span class="nc" id="L181">                        Matcher.quoteReplacement(matcher.group(1) + &quot;cid:&quot; + cid + matcher.group(3)));</span>
+            }
+<span class="nc" id="L183">        }</span>
+
+        // append the remaining items...
+<span class="nc" id="L186">        matcher.appendTail(stringBuffer);</span>
+
+<span class="nc" id="L188">        cidCache.clear();</span>
+<span class="nc" id="L189">        dataSourceCache.clear();</span>
+
+<span class="nc" id="L191">        return stringBuffer.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

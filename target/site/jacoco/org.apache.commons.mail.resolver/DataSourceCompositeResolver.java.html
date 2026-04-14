@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataSourceCompositeResolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Commons Email</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.mail.resolver</a> &gt; <span class="el_source">DataSourceCompositeResolver.java</span></div><h1>DataSourceCompositeResolver.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.mail.resolver;
+
+import org.apache.commons.mail.DataSourceResolver;
+
+import javax.activation.DataSource;
+import java.io.IOException;
+
+/**
+ * A composite data source resolver. It allows to resolve data sources coming from
+ * multiple locations such as the classpath, the file system or an URL.
+ *
+ * @since 1.3
+ * @version $Id: DataSourceCompositeResolver.java 1420381 2012-12-11 20:18:05Z tn $
+ */
+public class DataSourceCompositeResolver extends DataSourceBaseResolver
+{
+    /** the list of resolvers */
+    private final DataSourceResolver[] dataSourceResolvers;
+
+    /**
+     * Constructor.
+     *
+     * @param dataSourceResolvers a list of of resolvers being used
+     */
+    public DataSourceCompositeResolver(final DataSourceResolver[] dataSourceResolvers)
+<span class="nc" id="L42">    {</span>
+<span class="nc" id="L43">        this.dataSourceResolvers = new DataSourceResolver[dataSourceResolvers.length];</span>
+<span class="nc" id="L44">        System.arraycopy(dataSourceResolvers, 0, this.dataSourceResolvers, 0, dataSourceResolvers.length);</span>
+<span class="nc" id="L45">    }</span>
+
+    /**
+     * Constructor.
+     *
+     * @param dataSourceResolvers a list of of resolvers being used
+     * @param isLenient shall we ignore resources not found or throw an exception?
+     */
+    public DataSourceCompositeResolver(final DataSourceResolver[] dataSourceResolvers, final boolean isLenient)
+    {
+<span class="nc" id="L55">        super(isLenient);</span>
+<span class="nc" id="L56">        this.dataSourceResolvers = new DataSourceResolver[dataSourceResolvers.length];</span>
+<span class="nc" id="L57">        System.arraycopy(dataSourceResolvers, 0, this.dataSourceResolvers, 0, dataSourceResolvers.length);</span>
+<span class="nc" id="L58">    }</span>
+
+    /**
+     * Get the underlying data source resolvers.
+     *
+     * @return underlying data source resolvers
+     */
+    public DataSourceResolver[] getDataSourceResolvers()
+    {
+        // clone the internal array to prevent external modification (see EMAIL-116)
+<span class="nc" id="L68">        final DataSourceResolver[] resolvers = new DataSourceResolver[dataSourceResolvers.length];</span>
+<span class="nc" id="L69">        System.arraycopy(dataSourceResolvers, 0, resolvers, 0, dataSourceResolvers.length);</span>
+<span class="nc" id="L70">        return resolvers;</span>
+    }
+
+    /** {@inheritDoc} */
+    public DataSource resolve(String resourceLocation) throws IOException
+    {
+<span class="nc" id="L76">        DataSource result = resolve(resourceLocation, true);</span>
+
+<span class="nc bnc" id="L78" title="All 4 branches missed.">        if (isLenient() || result != null)</span>
+        {
+<span class="nc" id="L80">            return result;</span>
+        }
+        else
+        {
+<span class="nc" id="L84">            throw new IOException(&quot;The following resource was not found : &quot; + resourceLocation);</span>
+        }
+
+    }
+
+    /** {@inheritDoc} */
+    public DataSource resolve(final String resourceLocation, final boolean isLenient) throws IOException
+    {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        for (int i = 0; i &lt; getDataSourceResolvers().length; i++)</span>
+        {
+<span class="nc" id="L94">            DataSourceResolver dataSourceResolver = getDataSourceResolvers()[i];</span>
+<span class="nc" id="L95">            DataSource dataSource = dataSourceResolver.resolve(resourceLocation, isLenient);</span>
+
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            if (dataSource != null)</span>
+            {
+<span class="nc" id="L99">                return dataSource;</span>
+            }
+        }
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (isLenient)</span>
+        {
+<span class="nc" id="L105">            return null;</span>
+        }
+        else
+        {
+<span class="nc" id="L109">            throw new IOException(&quot;The following resource was not found : &quot; + resourceLocation);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

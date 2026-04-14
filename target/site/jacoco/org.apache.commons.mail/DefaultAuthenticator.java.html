@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultAuthenticator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Commons Email</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.mail</a> &gt; <span class="el_source">DefaultAuthenticator.java</span></div><h1>DefaultAuthenticator.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.mail;
+
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+
+/**
+ * This is a very simple authentication object that can be used for any
+ * transport needing basic userName and password type authentication.
+ *
+ * @since 1.0
+ * @version $Id: DefaultAuthenticator.java 1459997 2013-03-22 21:23:15Z tn $
+ */
+public class DefaultAuthenticator extends Authenticator
+{
+    /** Stores the login information for authentication. */
+    private final PasswordAuthentication authentication;
+
+    /**
+     * Default constructor.
+     *
+     * @param userName user name to use when authentication is requested
+     * @param password password to use when authentication is requested
+     * @since 1.0
+     */
+    public DefaultAuthenticator(String userName, String password)
+<span class="fc" id="L42">    {</span>
+<span class="fc" id="L43">        this.authentication = new PasswordAuthentication(userName, password);</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * Gets the authentication object that will be used to login to the mail
+     * server.
+     *
+     * @return A &lt;code&gt;PasswordAuthentication&lt;/code&gt; object containing the
+     *         login information.
+     * @since 1.0
+     */
+    @Override
+    protected PasswordAuthentication getPasswordAuthentication()
+    {
+<span class="nc" id="L57">        return this.authentication;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

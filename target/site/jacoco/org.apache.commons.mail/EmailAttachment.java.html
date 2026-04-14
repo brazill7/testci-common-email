@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailAttachment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Commons Email</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.mail</a> &gt; <span class="el_source">EmailAttachment.java</span></div><h1>EmailAttachment.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.mail;
+
+import java.net.URL;
+
+/**
+ * This class models an email attachment. Used by MultiPartEmail.
+ *
+ * @since 1.0
+ * @version $Id: EmailAttachment.java 1459997 2013-03-22 21:23:15Z tn $
+ */
+<span class="nc" id="L27">public class EmailAttachment</span>
+{
+    /** Definition of the part being an attachment. */
+    public static final String ATTACHMENT = javax.mail.Part.ATTACHMENT;
+
+    /** Definition of the part being inline. */
+    public static final String INLINE = javax.mail.Part.INLINE;
+
+    /** The name of this attachment. */
+<span class="nc" id="L36">    private String name = &quot;&quot;;</span>
+
+    /** The description of this attachment. */
+<span class="nc" id="L39">    private String description = &quot;&quot;;</span>
+
+    /** The path to this attachment (ie c:/path/to/file.jpg). */
+<span class="nc" id="L42">    private String path = &quot;&quot;;</span>
+
+    /** The HttpURI where the file can be got. */
+    private URL url;
+
+    /** The disposition. */
+<span class="nc" id="L48">    private String disposition = EmailAttachment.ATTACHMENT;</span>
+
+    /**
+     * Get the description.
+     *
+     * @return A String.
+     * @since 1.0
+     */
+    public String getDescription()
+    {
+<span class="nc" id="L58">        return description;</span>
+    }
+
+    /**
+     * Get the name.
+     *
+     * @return A String.
+     * @since 1.0
+     */
+    public String getName()
+    {
+<span class="nc" id="L69">        return name;</span>
+    }
+
+    /**
+     * Get the path.
+     *
+     * @return A String.
+     * @since 1.0
+     */
+    public String getPath()
+    {
+<span class="nc" id="L80">        return path;</span>
+    }
+
+    /**
+     * Get the URL.
+     *
+     * @return A URL.
+     * @since 1.0
+     */
+    public URL getURL()
+    {
+<span class="nc" id="L91">        return url;</span>
+    }
+
+    /**
+     * Get the disposition.
+     *
+     * @return A String.
+     * @since 1.0
+     */
+    public String getDisposition()
+    {
+<span class="nc" id="L102">        return disposition;</span>
+    }
+
+    /**
+     * Set the description.
+     *
+     * @param desc A String.
+     * @since 1.0
+     */
+    public void setDescription(String desc)
+    {
+<span class="nc" id="L113">        this.description = desc;</span>
+<span class="nc" id="L114">    }</span>
+
+    /**
+     * Set the name.
+     *
+     * @param aName A String.
+     * @since 1.0
+     */
+    public void setName(String aName)
+    {
+<span class="nc" id="L124">        this.name = aName;</span>
+<span class="nc" id="L125">    }</span>
+
+    /**
+     * Set the path to the attachment.  The path can be absolute or relative
+     * and should include the filename.
+     * &lt;p&gt;
+     * Example: /home/user/images/image.jpg&lt;br&gt;
+     * Example: images/image.jpg
+     *
+     * @param aPath A String.
+     * @since 1.0
+     */
+    public void setPath(String aPath)
+    {
+<span class="nc" id="L139">        this.path = aPath;</span>
+<span class="nc" id="L140">    }</span>
+
+    /**
+     * Set the URL.
+     *
+     * @param aUrl A URL.
+     * @since 1.0
+     */
+    public void setURL(URL aUrl)
+    {
+<span class="nc" id="L150">        this.url = aUrl;</span>
+<span class="nc" id="L151">    }</span>
+
+    /**
+     * Set the disposition.
+     *
+     * @param aDisposition A String.
+     * @since 1.0
+     */
+    public void setDisposition(String aDisposition)
+    {
+<span class="nc" id="L161">        this.disposition = aDisposition;</span>
+<span class="nc" id="L162">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

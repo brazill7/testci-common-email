@@ -1,0 +1,1933 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Email.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Commons Email</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.mail</a> &gt; <span class="el_source">Email.java</span></div><h1>Email.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.mail;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
+/**
+ * The base class for all email messages.  This class sets the
+ * sender's email &amp;amp; name, receiver's email &amp;amp; name, subject, and the
+ * sent date.
+ * &lt;p&gt;
+ * Subclasses are responsible for setting the message body.
+ *
+ * @since 1.0
+ * @version $Id: Email.java 1532531 2013-10-15 21:13:11Z tn $
+ */
+<span class="fc" id="L54">public abstract class Email</span>
+{
+    /** @deprecated since 1.3, use {@link EmailConstants#SENDER_EMAIL} instead */
+    @Deprecated
+    public static final String SENDER_EMAIL = EmailConstants.SENDER_EMAIL;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#SENDER_NAME} instead */
+    @Deprecated
+    public static final String SENDER_NAME = EmailConstants.SENDER_NAME;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#RECEIVER_EMAIL} instead */
+    @Deprecated
+    public static final String RECEIVER_EMAIL = EmailConstants.RECEIVER_EMAIL;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#RECEIVER_NAME} instead */
+    @Deprecated
+    public static final String RECEIVER_NAME = EmailConstants.RECEIVER_NAME;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#EMAIL_SUBJECT} instead */
+    @Deprecated
+    public static final String EMAIL_SUBJECT = EmailConstants.EMAIL_SUBJECT;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#EMAIL_BODY} instead */
+    @Deprecated
+    public static final String EMAIL_BODY = EmailConstants.EMAIL_BODY;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#CONTENT_TYPE} instead */
+    @Deprecated
+    public static final String CONTENT_TYPE = EmailConstants.CONTENT_TYPE;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#ATTACHMENTS} instead */
+    @Deprecated
+    public static final String ATTACHMENTS = EmailConstants.ATTACHMENTS;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#FILE_SERVER} instead */
+    @Deprecated
+    public static final String FILE_SERVER = EmailConstants.FILE_SERVER;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#KOI8_R} instead */
+    @Deprecated
+    public static final String KOI8_R = EmailConstants.KOI8_R;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#ISO_8859_1} instead */
+    @Deprecated
+    public static final String ISO_8859_1 = EmailConstants.ISO_8859_1;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#US_ASCII} instead */
+    @Deprecated
+    public static final String US_ASCII = EmailConstants.US_ASCII;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_DEBUG} instead */
+    @Deprecated
+    public static final String MAIL_DEBUG = EmailConstants.MAIL_DEBUG;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_HOST} instead */
+    @Deprecated
+    public static final String MAIL_HOST = EmailConstants.MAIL_HOST;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_PORT} instead */
+    @Deprecated
+    public static final String MAIL_PORT = EmailConstants.MAIL_PORT;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_FROM} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_FROM = EmailConstants.MAIL_SMTP_FROM;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_AUTH} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_AUTH = EmailConstants.MAIL_SMTP_AUTH;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_USER} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_USER = EmailConstants.MAIL_SMTP_USER;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_PASSWORD} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_PASSWORD = EmailConstants.MAIL_SMTP_PASSWORD;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_TRANSPORT_PROTOCOL} instead */
+    @Deprecated
+    public static final String MAIL_TRANSPORT_PROTOCOL = EmailConstants.MAIL_TRANSPORT_PROTOCOL;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#SMTP} instead */
+    @Deprecated
+    public static final String SMTP = EmailConstants.SMTP;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#TEXT_HTML} instead */
+    @Deprecated
+    public static final String TEXT_HTML = EmailConstants.TEXT_HTML;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#TEXT_PLAIN} instead */
+    @Deprecated
+    public static final String TEXT_PLAIN = EmailConstants.TEXT_PLAIN;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_TRANSPORT_TLS} instead */
+    @Deprecated
+    public static final String MAIL_TRANSPORT_TLS = EmailConstants.MAIL_TRANSPORT_TLS;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_SOCKET_FACTORY_FALLBACK} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_SOCKET_FACTORY_FALLBACK = EmailConstants.MAIL_SMTP_SOCKET_FACTORY_FALLBACK;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_SOCKET_FACTORY_CLASS} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_SOCKET_FACTORY_CLASS = EmailConstants.MAIL_SMTP_SOCKET_FACTORY_CLASS;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_SOCKET_FACTORY_PORT} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_SOCKET_FACTORY_PORT = EmailConstants.MAIL_SMTP_SOCKET_FACTORY_PORT;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_CONNECTIONTIMEOUT} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_CONNECTIONTIMEOUT = EmailConstants.MAIL_SMTP_CONNECTIONTIMEOUT;
+
+    /** @deprecated since 1.3, use {@link EmailConstants#MAIL_SMTP_TIMEOUT} instead */
+    @Deprecated
+    public static final String MAIL_SMTP_TIMEOUT = EmailConstants.MAIL_SMTP_TIMEOUT;
+
+    /** The email message to send. */
+    protected MimeMessage message;
+
+    /** The charset to use for this message. */
+    protected String charset;
+
+    /** The Address of the sending party, mandatory. */
+    protected InternetAddress fromAddress;
+
+    /** The Subject. */
+    protected String subject;
+
+    /** An attachment. */
+    protected MimeMultipart emailBody;
+
+    /** The content. */
+    protected Object content;
+
+    /** The content type. */
+    protected String contentType;
+
+    /** Set session debugging on or off. */
+    protected boolean debug;
+
+    /** Sent date. */
+    protected Date sentDate;
+
+    /**
+     * Instance of an &lt;code&gt;Authenticator&lt;/code&gt; object that will be used
+     * when authentication is requested from the mail server.
+     */
+    protected Authenticator authenticator;
+
+    /**
+     * The hostname of the mail server with which to connect. If null will try
+     * to get property from system.properties. If still null, quit.
+     */
+    protected String hostName;
+
+    /**
+     * The port number of the mail server to connect to.
+     * Defaults to the standard port ( 25 ).
+     */
+<span class="fc" id="L215">    protected String smtpPort = &quot;25&quot;;</span>
+
+    /**
+     * The port number of the SSL enabled SMTP server;
+     * defaults to the standard port, 465.
+     */
+<span class="fc" id="L221">    protected String sslSmtpPort = &quot;465&quot;;</span>
+
+    /** List of &quot;to&quot; email addresses. */
+<span class="fc" id="L224">    protected List&lt;InternetAddress&gt; toList = new ArrayList&lt;InternetAddress&gt;();</span>
+
+    /** List of &quot;cc&quot; email addresses. */
+<span class="fc" id="L227">    protected List&lt;InternetAddress&gt; ccList = new ArrayList&lt;InternetAddress&gt;();</span>
+
+    /** List of &quot;bcc&quot; email addresses. */
+<span class="fc" id="L230">    protected List&lt;InternetAddress&gt; bccList = new ArrayList&lt;InternetAddress&gt;();</span>
+
+    /** List of &quot;replyTo&quot; email addresses. */
+<span class="fc" id="L233">    protected List&lt;InternetAddress&gt; replyList = new ArrayList&lt;InternetAddress&gt;();</span>
+
+    /**
+     * Address to which undeliverable mail should be sent.
+     * Because this is handled by JavaMail as a String property
+     * in the mail session, this property is of type &lt;code&gt;String&lt;/code&gt;
+     * rather than &lt;code&gt;InternetAddress&lt;/code&gt;.
+     */
+    protected String bounceAddress;
+
+    /**
+     * Used to specify the mail headers.  Example:
+     *
+     * X-Mailer: Sendmail, X-Priority: 1( highest )
+     * or  2( high ) 3( normal ) 4( low ) and 5( lowest )
+     * Disposition-Notification-To: user@domain.net
+     */
+<span class="fc" id="L250">    protected Map&lt;String, String&gt; headers = new HashMap&lt;String, String&gt;();</span>
+
+    /**
+     * Used to determine whether to use pop3 before smtp, and if so the settings.
+     */
+    protected boolean popBeforeSmtp;
+
+    /** the host name of the pop3 server. */
+    protected String popHost;
+
+    /** the user name to log into the pop3 server. */
+    protected String popUsername;
+
+    /** the password to log into the pop3 server. */
+    protected String popPassword;
+
+    /**
+     * Does server require TLS encryption for authentication?
+     * @deprecated  since 1.3, use setStartTLSEnabled() instead
+     */
+    @Deprecated
+    protected boolean tls;
+
+    /**
+     * Does the current transport use SSL/TLS encryption upon connection?
+     * @deprecated since 1.3, use setSSLOnConnect() instead
+     */
+    @Deprecated
+    protected boolean ssl;
+
+    /** socket I/O timeout value in milliseconds. */
+<span class="fc" id="L281">    protected int socketTimeout = EmailConstants.SOCKET_TIMEOUT_MS;</span>
+
+    /** socket connection timeout value in milliseconds. */
+<span class="fc" id="L284">    protected int socketConnectionTimeout = EmailConstants.SOCKET_TIMEOUT_MS;</span>
+
+    /**
+     * If true, enables the use of the STARTTLS command (if supported by
+     * the server) to switch the connection to a TLS-protected connection
+     * before issuing any login commands. Note that an appropriate trust
+     * store must configured so that the client will trust the server's
+     * certificate.
+     * Defaults to false.
+     */
+    private boolean startTlsEnabled;
+
+    /**
+     * If true, requires the use of the STARTTLS command. If the server doesn't
+     * support the STARTTLS command, or the command fails, the connect method
+     * will fail.
+     * Defaults to false.
+     */
+    private boolean startTlsRequired;
+
+    /** does the current transport use SSL/TLS encryption upon connection? */
+    private boolean sslOnConnect;
+
+    /**
+     * If set to true, check the server identity as specified by RFC 2595. These
+     * additional checks based on the content of the server's certificate are
+     * intended to prevent man-in-the-middle attacks.
+     * Defaults to false.
+     */
+    private boolean sslCheckServerIdentity;
+
+    /**
+     * If set to true, and a message has some valid and some invalid addresses, send the message anyway,
+     * reporting the partial failure with a SendFailedException.
+     * If set to false (the default), the message is not sent to any of the recipients
+     * if there is an invalid recipient address.
+     * Defaults to false.
+     */
+    private boolean sendPartial;
+
+    /** The Session to mail with. */
+    private Session session;
+
+    /**
+     * Setting to true will enable the display of debug information.
+     *
+     * @param d A boolean.
+     * @since 1.0
+     */
+    public void setDebug(boolean d)
+    {
+<span class="nc" id="L335">        this.debug = d;</span>
+<span class="nc" id="L336">    }</span>
+
+    /**
+     * Sets the userName and password if authentication is needed.  If this
+     * method is not used, no authentication will be performed.
+     * &lt;p&gt;
+     * This method will create a new instance of
+     * &lt;code&gt;DefaultAuthenticator&lt;/code&gt; using the supplied parameters.
+     *
+     * @param userName User name for the SMTP server
+     * @param password password for the SMTP server
+     * @see DefaultAuthenticator
+     * @see #setAuthenticator
+     * @since 1.0
+     */
+    public void setAuthentication(String userName, String password)
+    {
+<span class="fc" id="L353">        this.setAuthenticator(new DefaultAuthenticator(userName, password));</span>
+<span class="fc" id="L354">    }</span>
+
+    /**
+     * Sets the &lt;code&gt;Authenticator&lt;/code&gt; to be used when authentication
+     * is requested from the mail server.
+     * &lt;p&gt;
+     * This method should be used when your outgoing mail server requires
+     * authentication.  Your mail server must also support RFC2554.
+     *
+     * @param newAuthenticator the &lt;code&gt;Authenticator&lt;/code&gt; object.
+     * @see Authenticator
+     * @since 1.0
+     */
+    public void setAuthenticator(Authenticator newAuthenticator)
+    {
+<span class="fc" id="L369">        this.authenticator = newAuthenticator;</span>
+<span class="fc" id="L370">    }</span>
+
+    /**
+     * Set the charset of the message. Please note that you should set the charset before
+     * adding the message content.
+     *
+     * @param newCharset A String.
+     * @throws java.nio.charset.IllegalCharsetNameException if the charset name is invalid
+     * @throws java.nio.charset.UnsupportedCharsetException if no support for the named charset
+     * exists in the current JVM
+     * @since 1.0
+     */
+    public void setCharset(String newCharset)
+    {
+<span class="fc" id="L384">        Charset set = Charset.forName(newCharset);</span>
+<span class="fc" id="L385">        this.charset = set.name();</span>
+<span class="fc" id="L386">    }</span>
+
+    /**
+     * Set the emailBody to a MimeMultiPart
+     *
+     * @param aMimeMultipart aMimeMultipart
+     * @since 1.0
+     */
+    public void setContent(MimeMultipart aMimeMultipart)
+    {
+<span class="fc" id="L396">        this.emailBody = aMimeMultipart;</span>
+<span class="fc" id="L397">    }</span>
+
+    /**
+     * Set the content &amp; contentType
+     *
+     * @param   aObject aObject
+     * @param   aContentType aContentType
+     * @since 1.0
+     */
+    public void setContent(Object aObject, String aContentType)
+    {
+<span class="fc" id="L408">        this.content = aObject;</span>
+<span class="fc" id="L409">        this.updateContentType(aContentType);</span>
+<span class="fc" id="L410">    }</span>
+
+    /**
+     * Update the contentType.
+     *
+     * @param   aContentType aContentType
+     * @since 1.2
+     */
+    public void updateContentType(final String aContentType)
+    {
+<span class="fc bfc" id="L420" title="All 2 branches covered.">        if (EmailUtils.isEmpty(aContentType))</span>
+        {
+<span class="fc" id="L422">            this.contentType = null;</span>
+        }
+        else
+        {
+            // set the content type
+<span class="fc" id="L427">            this.contentType = aContentType;</span>
+
+            // set the charset if the input was properly formed
+<span class="fc" id="L430">            String strMarker = &quot;; charset=&quot;;</span>
+<span class="fc" id="L431">            int charsetPos = aContentType.toLowerCase().indexOf(strMarker);</span>
+
+<span class="fc bfc" id="L433" title="All 2 branches covered.">            if (charsetPos != -1)</span>
+            {
+                // find the next space (after the marker)
+<span class="fc" id="L436">                charsetPos += strMarker.length();</span>
+<span class="fc" id="L437">                int intCharsetEnd =</span>
+<span class="fc" id="L438">                    aContentType.toLowerCase().indexOf(&quot; &quot;, charsetPos);</span>
+
+<span class="pc bpc" id="L440" title="1 of 2 branches missed.">                if (intCharsetEnd != -1)</span>
+                {
+<span class="nc" id="L442">                    this.charset =</span>
+<span class="nc" id="L443">                        aContentType.substring(charsetPos, intCharsetEnd);</span>
+                }
+                else
+                {
+<span class="fc" id="L447">                    this.charset = aContentType.substring(charsetPos);</span>
+                }
+<span class="fc" id="L449">            }</span>
+            else
+            {
+                // use the default charset, if one exists, for messages
+                // whose content-type is some form of text.
+<span class="pc bpc" id="L454" title="2 of 4 branches missed.">                if (this.contentType.startsWith(&quot;text/&quot;) &amp;&amp; EmailUtils.isNotEmpty(this.charset))</span>
+                {
+<span class="fc" id="L456">                    StringBuffer contentTypeBuf = new StringBuffer(this.contentType);</span>
+<span class="fc" id="L457">                    contentTypeBuf.append(strMarker);</span>
+<span class="fc" id="L458">                    contentTypeBuf.append(this.charset);</span>
+<span class="fc" id="L459">                    this.contentType = contentTypeBuf.toString();</span>
+                }
+            }
+        }
+<span class="fc" id="L463">    }</span>
+
+    /**
+     * Set the hostname of the outgoing mail server.
+     *
+     * @param   aHostName aHostName
+     * @since 1.0
+     */
+    public void setHostName(String aHostName)
+    {
+<span class="fc" id="L473">        checkSessionAlreadyInitialized();</span>
+<span class="fc" id="L474">        this.hostName = aHostName;</span>
+<span class="fc" id="L475">    }</span>
+
+    /**
+     * Set or disable the STARTTLS encryption. Please see EMAIL-105
+     * for the reasons of deprecation.
+     *
+     * @deprecated since 1.3, use setStartTLSEnabled() instead
+     * @param withTLS true if STARTTLS requested, false otherwise
+     * @since 1.1
+     */
+    @Deprecated
+    public void setTLS(boolean withTLS)
+    {
+<span class="nc" id="L488">        setStartTLSEnabled(withTLS);</span>
+<span class="nc" id="L489">    }</span>
+
+    /**
+     * Set or disable the STARTTLS encryption.
+     *
+     * @param startTlsEnabled true if STARTTLS requested, false otherwise
+     * @return An Email.
+     * @since 1.3
+     */
+    public Email setStartTLSEnabled(boolean startTlsEnabled)
+    {
+<span class="nc" id="L500">        checkSessionAlreadyInitialized();</span>
+<span class="nc" id="L501">        this.startTlsEnabled = startTlsEnabled;</span>
+<span class="nc" id="L502">        this.tls = startTlsEnabled;</span>
+<span class="nc" id="L503">        return this;</span>
+    }
+
+    /**
+     * Set or disable the required STARTTLS encryption.
+     *
+     * @param startTlsRequired true if STARTTLS requested, false otherwise
+     * @return An Email.
+     * @since 1.3
+     */
+    public Email setStartTLSRequired(boolean startTlsRequired)
+    {
+<span class="nc" id="L515">        checkSessionAlreadyInitialized();</span>
+<span class="nc" id="L516">        this.startTlsRequired = startTlsRequired;</span>
+<span class="nc" id="L517">        return this;</span>
+    }
+
+    /**
+     * Set the port number of the outgoing mail server.
+     *
+     * @param  aPortNumber aPortNumber
+     * @throws IllegalArgumentException if the port number is &amp;lt; 1
+     * @since 1.0
+     */
+    public void setSmtpPort(int aPortNumber)
+    {
+<span class="nc" id="L529">        checkSessionAlreadyInitialized();</span>
+
+<span class="nc bnc" id="L531" title="All 2 branches missed.">        if (aPortNumber &lt; 1)</span>
+        {
+<span class="nc" id="L533">            throw new IllegalArgumentException(</span>
+                &quot;Cannot connect to a port number that is less than 1 ( &quot;
+                    + aPortNumber
+                    + &quot; )&quot;);
+        }
+
+<span class="nc" id="L539">        this.smtpPort = Integer.toString(aPortNumber);</span>
+<span class="nc" id="L540">    }</span>
+
+    /**
+     * Supply a mail Session object to use. Please note that passing
+     * a user name and password (in the case of mail authentication) will
+     * create a new mail session with a DefaultAuthenticator. This is a
+     * convenience but might come unexpected.
+     *
+     * If mail authentication is used but NO username and password
+     * is supplied the implementation assumes that you have set a
+     * authenticator and will use the existing mail session (as expected).
+     *
+     * @param aSession mail session to be used
+     * @throws IllegalArgumentException if the session is {@code null}
+     * @since 1.0
+     */
+    public void setMailSession(Session aSession)
+    {
+<span class="fc" id="L558">        EmailUtils.notNull(aSession, &quot;no mail session supplied&quot;);</span>
+
+<span class="fc" id="L560">        Properties sessionProperties = aSession.getProperties();</span>
+<span class="fc" id="L561">        String auth = sessionProperties.getProperty(MAIL_SMTP_AUTH);</span>
+
+<span class="pc bpc" id="L563" title="1 of 2 branches missed.">        if (&quot;true&quot;.equalsIgnoreCase(auth))</span>
+        {
+<span class="nc" id="L565">            String userName = sessionProperties.getProperty(MAIL_SMTP_USER);</span>
+<span class="nc" id="L566">            String password = sessionProperties.getProperty(MAIL_SMTP_PASSWORD);</span>
+
+<span class="nc bnc" id="L568" title="All 4 branches missed.">            if (EmailUtils.isNotEmpty(userName) &amp;&amp; EmailUtils.isNotEmpty(password))</span>
+            {
+                // only create a new mail session with an authenticator if
+                // authentication is required and no user name is given
+<span class="nc" id="L572">                this.authenticator = new DefaultAuthenticator(userName, password);</span>
+<span class="nc" id="L573">                this.session = Session.getInstance(sessionProperties, this.authenticator);</span>
+            }
+            else
+            {
+                // assume that the given mail session contains a working authenticator
+<span class="nc" id="L578">                this.session = aSession;</span>
+            }
+<span class="nc" id="L580">        }</span>
+        else
+        {
+<span class="fc" id="L583">            this.session = aSession;</span>
+        }
+<span class="fc" id="L585">    }</span>
+
+    /**
+     * Supply a mail Session object from a JNDI directory.
+     *
+     * @param jndiName name of JNDI resource (javax.mail.Session type), resource
+     * if searched in java:comp/env if name does not start with &quot;java:&quot;
+     * @throws IllegalArgumentException if the JNDI name is null or empty
+     * @throws NamingException if the resource cannot be retrieved from JNDI directory
+     * @since 1.1
+     */
+    public void setMailSessionFromJNDI(String jndiName) throws NamingException
+    {
+<span class="nc bnc" id="L598" title="All 2 branches missed.">        if (EmailUtils.isEmpty(jndiName))</span>
+        {
+<span class="nc" id="L600">            throw new IllegalArgumentException(&quot;JNDI name missing&quot;);</span>
+        }
+<span class="nc" id="L602">        Context ctx = null;</span>
+<span class="nc bnc" id="L603" title="All 2 branches missed.">        if (jndiName.startsWith(&quot;java:&quot;))</span>
+        {
+<span class="nc" id="L605">            ctx = new InitialContext();</span>
+        }
+        else
+        {
+<span class="nc" id="L609">            ctx = (Context) new InitialContext().lookup(&quot;java:comp/env&quot;);</span>
+
+        }
+<span class="nc" id="L612">        this.setMailSession((Session) ctx.lookup(jndiName));</span>
+<span class="nc" id="L613">    }</span>
+
+    /**
+     * Determines the mail session used when sending this Email, creating
+     * the Session if necessary. When a mail session is already
+     * initialized setting the session related properties will cause
+     * an IllegalStateException.
+     *
+     * @return A Session.
+     * @throws EmailException if the host name was not set
+     * @since 1.0
+     */
+    public Session getMailSession() throws EmailException
+    {
+<span class="pc bpc" id="L627" title="1 of 2 branches missed.">        if (this.session == null)</span>
+        {
+<span class="fc" id="L629">            Properties properties = new Properties(System.getProperties());</span>
+<span class="fc" id="L630">            properties.setProperty(MAIL_TRANSPORT_PROTOCOL, SMTP);</span>
+
+<span class="fc bfc" id="L632" title="All 2 branches covered.">            if (EmailUtils.isEmpty(this.hostName))</span>
+            {
+<span class="fc" id="L634">                this.hostName = properties.getProperty(MAIL_HOST);</span>
+            }
+
+<span class="fc bfc" id="L637" title="All 2 branches covered.">            if (EmailUtils.isEmpty(this.hostName))</span>
+            {
+<span class="fc" id="L639">                throw new EmailException(&quot;Cannot find valid hostname for mail session&quot;);</span>
+            }
+
+<span class="fc" id="L642">            properties.setProperty(MAIL_PORT, this.smtpPort);</span>
+<span class="fc" id="L643">            properties.setProperty(MAIL_HOST, this.hostName);</span>
+<span class="fc" id="L644">            properties.setProperty(MAIL_DEBUG, String.valueOf(this.debug));</span>
+
+<span class="fc" id="L646">            properties.setProperty(EmailConstants.MAIL_TRANSPORT_STARTTLS_ENABLE,</span>
+<span class="pc bpc" id="L647" title="1 of 2 branches missed.">                    isStartTLSEnabled() ? &quot;true&quot; : &quot;false&quot;);</span>
+<span class="fc" id="L648">            properties.setProperty(EmailConstants.MAIL_TRANSPORT_STARTTLS_REQUIRED,</span>
+<span class="pc bpc" id="L649" title="1 of 2 branches missed.">                    isStartTLSRequired() ? &quot;true&quot; : &quot;false&quot;);</span>
+
+<span class="fc" id="L651">            properties.setProperty(EmailConstants.MAIL_SMTP_SEND_PARTIAL,</span>
+<span class="pc bpc" id="L652" title="1 of 2 branches missed.">                    isSendPartial() ? &quot;true&quot; : &quot;false&quot;);</span>
+<span class="fc" id="L653">            properties.setProperty(EmailConstants.MAIL_SMTPS_SEND_PARTIAL,</span>
+<span class="pc bpc" id="L654" title="1 of 2 branches missed.">                    isSendPartial() ? &quot;true&quot; : &quot;false&quot;);</span>
+
+<span class="fc bfc" id="L656" title="All 2 branches covered.">            if (this.authenticator != null)</span>
+            {
+<span class="fc" id="L658">                properties.setProperty(MAIL_SMTP_AUTH, &quot;true&quot;);</span>
+            }
+
+<span class="fc bfc" id="L661" title="All 2 branches covered.">            if (isSSLOnConnect())</span>
+            {
+<span class="fc" id="L663">                properties.setProperty(MAIL_PORT, this.sslSmtpPort);</span>
+<span class="fc" id="L664">                properties.setProperty(MAIL_SMTP_SOCKET_FACTORY_PORT, this.sslSmtpPort);</span>
+<span class="fc" id="L665">                properties.setProperty(MAIL_SMTP_SOCKET_FACTORY_CLASS, &quot;javax.net.ssl.SSLSocketFactory&quot;);</span>
+<span class="fc" id="L666">                properties.setProperty(MAIL_SMTP_SOCKET_FACTORY_FALLBACK, &quot;false&quot;);</span>
+            }
+
+<span class="pc bpc" id="L669" title="2 of 6 branches missed.">            if ((isSSLOnConnect() || isStartTLSEnabled()) &amp;&amp; isSSLCheckServerIdentity())</span>
+            {
+<span class="nc" id="L671">                properties.setProperty(EmailConstants.MAIL_SMTP_SSL_CHECKSERVERIDENTITY, &quot;true&quot;);</span>
+            }
+
+<span class="fc bfc" id="L674" title="All 2 branches covered.">            if (this.bounceAddress != null)</span>
+            {
+<span class="fc" id="L676">                properties.setProperty(MAIL_SMTP_FROM, this.bounceAddress);</span>
+            }
+
+<span class="pc bpc" id="L679" title="1 of 2 branches missed.">            if (this.socketTimeout &gt; 0)</span>
+            {
+<span class="fc" id="L681">                properties.setProperty(MAIL_SMTP_TIMEOUT, Integer.toString(this.socketTimeout));</span>
+            }
+
+<span class="pc bpc" id="L684" title="1 of 2 branches missed.">            if (this.socketConnectionTimeout &gt; 0)</span>
+            {
+<span class="fc" id="L686">                properties.setProperty(MAIL_SMTP_CONNECTIONTIMEOUT, Integer.toString(this.socketConnectionTimeout));</span>
+            }
+
+            // changed this (back) to getInstance due to security exceptions
+            // caused when testing using maven
+<span class="fc" id="L691">            this.session = Session.getInstance(properties, this.authenticator);</span>
+        }
+<span class="fc" id="L693">        return this.session;</span>
+    }
+
+    /**
+     * Set the FROM field of the email to use the specified address. The email
+     * address will also be used as the personal name.
+     * The name will be encoded by the charset of {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @since 1.
+     */
+    public Email setFrom(String email)
+        throws EmailException
+    {
+<span class="fc" id="L712">        return setFrom(email, null);</span>
+    }
+
+    /**
+     * Set the FROM field of the email to use the specified address and the
+     * specified personal name.
+     * The name will be encoded by the charset of {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @since 1.0
+     */
+    public Email setFrom(String email, String name)
+        throws EmailException
+    {
+<span class="fc" id="L732">        return setFrom(email, name, this.charset);</span>
+    }
+
+    /**
+     * Set the FROM field of the email to use the specified address, personal
+     * name, and charset encoding for the name.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @param charset The charset to encode the name with.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address or charset.
+     * @since 1.1
+     */
+    public Email setFrom(String email, String name, String charset)
+        throws EmailException
+    {
+<span class="fc" id="L749">        this.fromAddress = createInternetAddress(email, name, charset);</span>
+<span class="fc" id="L750">        return this;</span>
+    }
+
+    /**
+     * Add a recipient TO to the email. The email
+     * address will also be used as the personal name.
+     * The name will be encoded by the charset of
+     * {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @since 1.0
+     */
+    public Email addTo(String email)
+        throws EmailException
+    {
+<span class="fc" id="L770">        return addTo(email, null);</span>
+    }
+
+    /**
+     * Add a list of TO recipients to the email. The email
+     * addresses will also be used as the personal names.
+     * The names will be encoded by the charset of
+     * {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param emails A String array.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @since 1.3
+     */
+    public Email addTo(String... emails)
+        throws EmailException
+    {
+<span class="nc bnc" id="L790" title="All 4 branches missed.">        if (emails == null || emails.length == 0)</span>
+        {
+<span class="nc" id="L792">            throw new EmailException(&quot;Address List provided was invalid&quot;);</span>
+        }
+
+<span class="nc bnc" id="L795" title="All 2 branches missed.">        for (String email : emails)</span>
+        {
+<span class="nc" id="L797">            addTo(email, null);</span>
+        }
+
+<span class="nc" id="L800">        return this;</span>
+    }
+
+    /**
+     * Add a recipient TO to the email using the specified address and the
+     * specified personal name.
+     * The name will be encoded by the charset of
+     * {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @since 1.0
+     */
+    public Email addTo(String email, String name)
+        throws EmailException
+    {
+<span class="fc" id="L821">        return addTo(email, name, this.charset);</span>
+    }
+
+    /**
+     * Add a recipient TO to the email using the specified address, personal
+     * name, and charset encoding for the name.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @param charset The charset to encode the name with.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address or charset.
+     * @since 1.1
+     */
+    public Email addTo(String email, String name, String charset)
+        throws EmailException
+    {
+<span class="fc" id="L838">        this.toList.add(createInternetAddress(email, name, charset));</span>
+<span class="fc" id="L839">        return this;</span>
+    }
+
+    /**
+     * Set a list of &quot;TO&quot; addresses. All elements in the specified
+     * &lt;code&gt;Collection&lt;/code&gt; are expected to be of type
+     * &lt;code&gt;java.mail.internet.InternetAddress&lt;/code&gt;.
+     *
+     * @param  aCollection collection of &lt;code&gt;InternetAddress&lt;/code&gt; objects.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @see javax.mail.internet.InternetAddress
+     * @since 1.0
+     */
+    public Email setTo(Collection&lt;InternetAddress&gt; aCollection) throws EmailException
+    {
+<span class="nc bnc" id="L855" title="All 4 branches missed.">        if (aCollection == null || aCollection.isEmpty())</span>
+        {
+<span class="nc" id="L857">            throw new EmailException(&quot;Address List provided was invalid&quot;);</span>
+        }
+
+<span class="nc" id="L860">        this.toList = new ArrayList&lt;InternetAddress&gt;(aCollection);</span>
+<span class="nc" id="L861">        return this;</span>
+    }
+
+    /**
+     * Add a recipient CC to the email. The email
+     * address will also be used as the personal name.
+     * The name will be encoded by the charset of {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @since 1.0
+     */
+    public Email addCc(String email)
+        throws EmailException
+    {
+<span class="fc" id="L880">        return this.addCc(email, null);</span>
+    }
+
+    /**
+     * Add an array of CC recipients to the email. The email
+     * addresses will also be used as the personal name.
+     * The names will be encoded by the charset of
+     * {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param emails A String array.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @since 1.3
+     */
+    public Email addCc(String... emails)
+        throws EmailException
+    {
+<span class="fc bfc" id="L900" title="All 4 branches covered.">        if (emails == null || emails.length == 0)</span>
+        {
+<span class="fc" id="L902">            throw new EmailException(&quot;Address List provided was invalid&quot;);</span>
+        }
+
+<span class="fc bfc" id="L905" title="All 2 branches covered.">        for (String email : emails)</span>
+        {
+<span class="fc" id="L907">            addCc(email, null);</span>
+        }
+
+<span class="fc" id="L910">        return this;</span>
+    }
+
+    /**
+     * Add a recipient CC to the email using the specified address and the
+     * specified personal name.
+     * The name will be encoded by the charset of {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @since 1.0
+     */
+    public Email addCc(String email, String name)
+        throws EmailException
+    {
+<span class="fc" id="L930">        return addCc(email, name, this.charset);</span>
+    }
+
+    /**
+     * Add a recipient CC to the email using the specified address, personal
+     * name, and charset encoding for the name.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @param charset The charset to encode the name with.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address or charset.
+     * @since 1.1
+     */
+    public Email addCc(String email, String name, String charset)
+        throws EmailException
+    {
+<span class="fc" id="L947">        this.ccList.add(createInternetAddress(email, name, charset));</span>
+<span class="fc" id="L948">        return this;</span>
+    }
+
+    /**
+     * Set a list of &quot;CC&quot; addresses. All elements in the specified
+     * &lt;code&gt;Collection&lt;/code&gt; are expected to be of type
+     * &lt;code&gt;java.mail.internet.InternetAddress&lt;/code&gt;.
+     *
+     * @param aCollection collection of &lt;code&gt;InternetAddress&lt;/code&gt; objects.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address.
+     * @see javax.mail.internet.InternetAddress
+     * @since 1.0
+     */
+    public Email setCc(Collection&lt;InternetAddress&gt; aCollection) throws EmailException
+    {
+<span class="nc bnc" id="L964" title="All 4 branches missed.">        if (aCollection == null || aCollection.isEmpty())</span>
+        {
+<span class="nc" id="L966">            throw new EmailException(&quot;Address List provided was invalid&quot;);</span>
+        }
+
+<span class="nc" id="L969">        this.ccList = new ArrayList&lt;InternetAddress&gt;(aCollection);</span>
+<span class="nc" id="L970">        return this;</span>
+    }
+
+    /**
+     * Add a blind BCC recipient to the email. The email
+     * address will also be used as the personal name.
+     * The name will be encoded by the charset of {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address
+     * @since 1.0
+     */
+    public Email addBcc(String email)
+        throws EmailException
+    {
+<span class="fc" id="L989">        return this.addBcc(email, null);</span>
+    }
+
+    /**
+     * Add an array of blind BCC recipients to the email. The email
+     * addresses will also be used as the personal name.
+     * The names will be encoded by the charset of
+     * {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param emails A String array.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address
+     * @since 1.3
+     */
+    public Email addBcc(String... emails)
+        throws EmailException
+    {
+<span class="fc bfc" id="L1009" title="All 4 branches covered.">        if (emails == null || emails.length == 0)</span>
+        {
+<span class="fc" id="L1011">            throw new EmailException(&quot;Address List provided was invalid&quot;);</span>
+        }
+
+<span class="fc bfc" id="L1014" title="All 2 branches covered.">        for (String email : emails)</span>
+        {
+<span class="fc" id="L1016">            addBcc(email, null);</span>
+        }
+
+<span class="fc" id="L1019">        return this;</span>
+    }
+
+    /**
+     * Add a blind BCC recipient to the email using the specified address and
+     * the specified personal name.
+     * The name will be encoded by the charset of {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address
+     * @since 1.0
+     */
+    public Email addBcc(String email, String name)
+        throws EmailException
+    {
+<span class="fc" id="L1039">        return addBcc(email, name, this.charset);</span>
+    }
+
+    /**
+     * Add a blind BCC recipient to the email using the specified address,
+     * personal name, and charset encoding for the name.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @param charset The charset to encode the name with.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address
+     * @since 1.1
+     */
+    public Email addBcc(String email, String name, String charset)
+        throws EmailException
+    {
+<span class="fc" id="L1056">        this.bccList.add(createInternetAddress(email, name, charset));</span>
+<span class="fc" id="L1057">        return this;</span>
+    }
+
+    /**
+     * Set a list of &quot;BCC&quot; addresses. All elements in the specified
+     * &lt;code&gt;Collection&lt;/code&gt; are expected to be of type
+     * &lt;code&gt;java.mail.internet.InternetAddress&lt;/code&gt;.
+     *
+     * @param  aCollection collection of &lt;code&gt;InternetAddress&lt;/code&gt; objects
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address
+     * @see javax.mail.internet.InternetAddress
+     * @since 1.0
+     */
+    public Email setBcc(Collection&lt;InternetAddress&gt; aCollection) throws EmailException
+    {
+<span class="nc bnc" id="L1073" title="All 4 branches missed.">        if (aCollection == null || aCollection.isEmpty())</span>
+        {
+<span class="nc" id="L1075">            throw new EmailException(&quot;Address List provided was invalid&quot;);</span>
+        }
+
+<span class="nc" id="L1078">        this.bccList = new ArrayList&lt;InternetAddress&gt;(aCollection);</span>
+<span class="nc" id="L1079">        return this;</span>
+    }
+
+    /**
+     * Add a reply to address to the email. The email
+     * address will also be used as the personal name.
+     * The name will be encoded by the charset of {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address
+     * @since 1.0
+     */
+    public Email addReplyTo(String email)
+        throws EmailException
+    {
+<span class="fc" id="L1098">        return this.addReplyTo(email, null);</span>
+    }
+
+    /**
+     * Add a reply to address to the email using the specified address and
+     * the specified personal name.
+     * The name will be encoded by the charset of {@link #setCharset(java.lang.String) setCharset()}.
+     * If it is not set, it will be encoded using
+     * the Java platform's default charset (UTF-16) if it contains
+     * non-ASCII characters; otherwise, it is used as is.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address
+     * @since 1.0
+     */
+    public Email addReplyTo(String email, String name)
+        throws EmailException
+    {
+<span class="fc" id="L1118">        return addReplyTo(email, name, this.charset);</span>
+    }
+
+    /**
+     * Add a reply to address to the email using the specified address,
+     * personal name, and charset encoding for the name.
+     *
+     * @param email A String.
+     * @param name A String.
+     * @param charset The charset to encode the name with.
+     * @return An Email.
+     * @throws EmailException Indicates an invalid email address or charset.
+     * @since 1.1
+     */
+    public Email addReplyTo(String email, String name, String charset)
+        throws EmailException
+    {
+<span class="fc" id="L1135">        this.replyList.add(createInternetAddress(email, name, charset));</span>
+<span class="fc" id="L1136">        return this;</span>
+    }
+
+    /**
+     * Set a list of reply to addresses. All elements in the specified
+     * &lt;code&gt;Collection&lt;/code&gt; are expected to be of type
+     * &lt;code&gt;java.mail.internet.InternetAddress&lt;/code&gt;.
+     *
+     * @param   aCollection collection of &lt;code&gt;InternetAddress&lt;/code&gt; objects
+     * @return  An Email.
+     * @throws EmailException Indicates an invalid email address
+     * @see javax.mail.internet.InternetAddress
+     * @since 1.1
+     */
+    public Email setReplyTo(Collection&lt;InternetAddress&gt; aCollection) throws EmailException
+    {
+<span class="nc bnc" id="L1152" title="All 4 branches missed.">        if (aCollection == null || aCollection.isEmpty())</span>
+        {
+<span class="nc" id="L1154">            throw new EmailException(&quot;Address List provided was invalid&quot;);</span>
+        }
+
+<span class="nc" id="L1157">        this.replyList = new ArrayList&lt;InternetAddress&gt;(aCollection);</span>
+<span class="nc" id="L1158">        return this;</span>
+    }
+
+    /**
+     * Used to specify the mail headers.  Example:
+     *
+     * X-Mailer: Sendmail, X-Priority: 1( highest )
+     * or  2( high ) 3( normal ) 4( low ) and 5( lowest )
+     * Disposition-Notification-To: user@domain.net
+     *
+     * @param map A Map.
+     * @throws IllegalArgumentException if either of the provided header / value is null or empty
+     * @since 1.0
+     */
+    public void setHeaders(Map&lt;String, String&gt; map)
+    {
+<span class="nc" id="L1174">        this.headers.clear();</span>
+
+<span class="nc bnc" id="L1176" title="All 2 branches missed.">        for (Map.Entry&lt;String, String&gt; entry : map.entrySet())</span>
+        {
+<span class="nc" id="L1178">            addHeader(entry.getKey(), entry.getValue());</span>
+<span class="nc" id="L1179">        }</span>
+<span class="nc" id="L1180">    }</span>
+
+    /**
+     * Adds a header ( name, value ) to the headers Map.
+     *
+     * @param name A String with the name.
+     * @param value A String with the value.
+     * @since 1.0
+     * @throws IllegalArgumentException if either {@code name} or {@code value} is null or empty
+     */
+    public void addHeader(String name, String value)
+    {
+<span class="fc bfc" id="L1192" title="All 2 branches covered.">        if (EmailUtils.isEmpty(name))</span>
+        {
+<span class="fc" id="L1194">            throw new IllegalArgumentException(&quot;name can not be null or empty&quot;);</span>
+        }
+<span class="fc bfc" id="L1196" title="All 2 branches covered.">        if (EmailUtils.isEmpty(value))</span>
+        {
+<span class="fc" id="L1198">            throw new IllegalArgumentException(&quot;value can not be null or empty&quot;);</span>
+        }
+
+<span class="fc" id="L1201">        this.headers.put(name, value);</span>
+<span class="fc" id="L1202">    }</span>
+
+    /**
+     * Set the email subject.
+     *
+     * @param aSubject A String.
+     * @return An Email.
+     * @since 1.0
+     */
+    public Email setSubject(String aSubject)
+    {
+<span class="fc" id="L1213">        this.subject = aSubject;</span>
+<span class="fc" id="L1214">        return this;</span>
+    }
+
+    /**
+     * Set the &quot;bounce address&quot; - the address to which undeliverable messages
+     * will be returned.  If this value is never set, then the message will be
+     * sent to the address specified with the System property &quot;mail.smtp.from&quot;,
+     * or if that value is not set, then to the &quot;from&quot; address.
+     *
+     * @param email A String.
+     * @return An Email.
+     * @throws IllegalStateException when the mail session is already initialized
+     * @since 1.0
+     */
+    public Email setBounceAddress(String email)
+    {
+<span class="fc" id="L1230">        checkSessionAlreadyInitialized();</span>
+<span class="fc" id="L1231">        this.bounceAddress = email;</span>
+<span class="fc" id="L1232">        return this;</span>
+    }
+
+
+    /**
+     * Define the content of the mail. It should be overridden by the
+     * subclasses.
+     *
+     * @param msg A String.
+     * @return An Email.
+     * @throws EmailException generic exception.
+     * @since 1.0
+     */
+    public abstract Email setMsg(String msg) throws EmailException;
+
+    /**
+     * Does the work of actually building the MimeMessage. Please note that
+     * a user rarely calls this method directly and only if he/she is
+     * interested in the sending the underlying MimeMessage without
+     * commons-email.
+     *
+     * @throws IllegalStateException if the MimeMessage was already built
+     * @throws EmailException if there was an error.
+     * @since 1.0
+     */
+    public void buildMimeMessage() throws EmailException
+    {
+<span class="fc bfc" id="L1259" title="All 2 branches covered.">        if (this.message != null)</span>
+        {
+            // [EMAIL-95] we assume that an email is not reused therefore invoking
+            // buildMimeMessage() more than once is illegal.
+<span class="fc" id="L1263">            throw new IllegalStateException(&quot;The MimeMessage is already built.&quot;);</span>
+        }
+
+        try
+        {
+<span class="fc" id="L1268">            this.message = this.createMimeMessage(this.getMailSession());</span>
+
+<span class="fc bfc" id="L1270" title="All 2 branches covered.">            if (EmailUtils.isNotEmpty(this.subject))</span>
+            {
+<span class="pc bpc" id="L1272" title="1 of 2 branches missed.">                if (EmailUtils.isNotEmpty(this.charset))</span>
+                {
+<span class="fc" id="L1274">                    this.message.setSubject(this.subject, this.charset);</span>
+                }
+                else
+                {
+<span class="nc" id="L1278">                    this.message.setSubject(this.subject);</span>
+                }
+            }
+
+            // update content type (and encoding)
+<span class="fc" id="L1283">            this.updateContentType(this.contentType);</span>
+
+<span class="fc bfc" id="L1285" title="All 2 branches covered.">            if (this.content != null)</span>
+            {
+<span class="pc bpc" id="L1287" title="3 of 4 branches missed.">                if (EmailConstants.TEXT_PLAIN.equalsIgnoreCase(this.contentType)</span>
+                        &amp;&amp; this.content instanceof String)
+                {
+                    // EMAIL-104: call explicitly setText to use default mime charset
+                    //            (property &quot;mail.mime.charset&quot;) in case none has been set
+<span class="nc" id="L1292">                    this.message.setText(this.content.toString(), this.charset);</span>
+                }
+                else
+                {
+<span class="fc" id="L1296">                    this.message.setContent(this.content, this.contentType);</span>
+                }
+            }
+<span class="fc bfc" id="L1299" title="All 2 branches covered.">            else if (this.emailBody != null)</span>
+            {
+<span class="pc bpc" id="L1301" title="1 of 2 branches missed.">                if (this.contentType == null)</span>
+                {
+<span class="fc" id="L1303">                    this.message.setContent(this.emailBody);</span>
+                }
+                else
+                {
+<span class="nc" id="L1307">                    this.message.setContent(this.emailBody, this.contentType);</span>
+                }
+            }
+            else
+            {
+<span class="fc" id="L1312">                this.message.setText(&quot;&quot;);</span>
+            }
+
+<span class="fc bfc" id="L1315" title="All 2 branches covered.">            if (this.fromAddress != null)</span>
+            {
+<span class="fc" id="L1317">                this.message.setFrom(this.fromAddress);</span>
+            }
+            else
+            {
+<span class="pc bpc" id="L1321" title="1 of 2 branches missed.">                if (session.getProperty(MAIL_SMTP_FROM) == null)</span>
+                {
+<span class="fc" id="L1323">                    throw new EmailException(&quot;From address required&quot;);</span>
+                }
+            }
+
+<span class="fc bfc" id="L1327" title="All 2 branches covered.">            if (this.toList.size() + this.ccList.size() + this.bccList.size() == 0)</span>
+            {
+<span class="fc" id="L1329">                throw new EmailException(&quot;At least one receiver address required&quot;);</span>
+            }
+
+<span class="pc bpc" id="L1332" title="1 of 2 branches missed.">            if (this.toList.size() &gt; 0)</span>
+            {
+<span class="fc" id="L1334">                this.message.setRecipients(</span>
+                    Message.RecipientType.TO,
+<span class="fc" id="L1336">                    this.toInternetAddressArray(this.toList));</span>
+            }
+
+<span class="fc bfc" id="L1339" title="All 2 branches covered.">            if (this.ccList.size() &gt; 0)</span>
+            {
+<span class="fc" id="L1341">                this.message.setRecipients(</span>
+                    Message.RecipientType.CC,
+<span class="fc" id="L1343">                    this.toInternetAddressArray(this.ccList));</span>
+            }
+
+<span class="fc bfc" id="L1346" title="All 2 branches covered.">            if (this.bccList.size() &gt; 0)</span>
+            {
+<span class="fc" id="L1348">                this.message.setRecipients(</span>
+                    Message.RecipientType.BCC,
+<span class="fc" id="L1350">                    this.toInternetAddressArray(this.bccList));</span>
+            }
+
+<span class="fc bfc" id="L1353" title="All 2 branches covered.">            if (this.replyList.size() &gt; 0)</span>
+            {
+<span class="fc" id="L1355">                this.message.setReplyTo(</span>
+<span class="fc" id="L1356">                    this.toInternetAddressArray(this.replyList));</span>
+            }
+
+
+<span class="fc bfc" id="L1360" title="All 2 branches covered.">            if (this.headers.size() &gt; 0)</span>
+            {
+<span class="fc bfc" id="L1362" title="All 2 branches covered.">                for (Map.Entry&lt;String, String&gt; entry : this.headers.entrySet())</span>
+                {
+<span class="fc" id="L1364">                    String foldedValue = createFoldedHeaderValue(entry.getKey(), entry.getValue());</span>
+<span class="fc" id="L1365">                    this.message.addHeader(entry.getKey(), foldedValue);</span>
+<span class="fc" id="L1366">                }</span>
+            }
+
+<span class="pc bpc" id="L1369" title="1 of 2 branches missed.">            if (this.message.getSentDate() == null)</span>
+            {
+<span class="fc" id="L1371">                this.message.setSentDate(getSentDate());</span>
+            }
+
+<span class="pc bpc" id="L1374" title="1 of 2 branches missed.">            if (this.popBeforeSmtp)</span>
+            {
+<span class="nc" id="L1376">                Store store = session.getStore(&quot;pop3&quot;);</span>
+<span class="nc" id="L1377">                store.connect(this.popHost, this.popUsername, this.popPassword);</span>
+            }
+        }
+<span class="nc" id="L1380">        catch (MessagingException me)</span>
+        {
+<span class="nc" id="L1382">            throw new EmailException(me);</span>
+<span class="fc" id="L1383">        }</span>
+<span class="fc" id="L1384">    }</span>
+
+    /**
+     * Sends the previously created MimeMessage to the SMTP server.
+     *
+     * @return the message id of the underlying MimeMessage
+     * @throws IllegalArgumentException if the MimeMessage has not been created
+     * @throws EmailException the sending failed
+     */
+    public String sendMimeMessage()
+       throws EmailException
+    {
+<span class="nc" id="L1396">        EmailUtils.notNull(this.message, &quot;MimeMessage has not been created yet&quot;);</span>
+
+        try
+        {
+<span class="nc" id="L1400">            Transport.send(this.message);</span>
+<span class="nc" id="L1401">            return this.message.getMessageID();</span>
+        }
+<span class="nc" id="L1403">        catch (Throwable t)</span>
+        {
+<span class="nc" id="L1405">            String msg = &quot;Sending the email to the following server failed : &quot;</span>
+<span class="nc" id="L1406">                + this.getHostName()</span>
+                + &quot;:&quot;
+<span class="nc" id="L1408">                + this.getSmtpPort();</span>
+
+<span class="nc" id="L1410">            throw new EmailException(msg, t);</span>
+        }
+    }
+
+    /**
+     * Returns the internal MimeMessage. Please not that the
+     * MimeMessage is build by the buildMimeMessage() method.
+     *
+     * @return the MimeMessage
+     */
+    public MimeMessage getMimeMessage()
+    {
+<span class="fc" id="L1422">        return this.message;</span>
+    }
+
+    /**
+     * Sends the email. Internally we build a MimeMessage
+     * which is afterwards sent to the SMTP server.
+     *
+     * @return the message id of the underlying MimeMessage
+     * @throws IllegalStateException if the MimeMessage was already built, ie {@link #buildMimeMessage()}
+     *   was already called
+     * @throws EmailException the sending failed
+     */
+    public String send() throws EmailException
+    {
+<span class="nc" id="L1436">        this.buildMimeMessage();</span>
+<span class="nc" id="L1437">        return this.sendMimeMessage();</span>
+    }
+
+    /**
+     * Sets the sent date for the email.  The sent date will default to the
+     * current date if not explicitly set.
+     *
+     * @param date Date to use as the sent date on the email
+     * @since 1.0
+     */
+    public void setSentDate(Date date)
+    {
+<span class="pc bpc" id="L1449" title="1 of 2 branches missed.">        if (date != null)</span>
+        {
+            // create a separate instance to keep findbugs happy
+<span class="fc" id="L1452">            this.sentDate = new Date(date.getTime());</span>
+        }
+<span class="fc" id="L1454">    }</span>
+
+    /**
+     * Gets the sent date for the email.
+     *
+     * @return date to be used as the sent date for the email
+     * @since 1.0
+     */
+    public Date getSentDate()
+    {
+<span class="fc bfc" id="L1464" title="All 2 branches covered.">        if (this.sentDate == null)</span>
+        {
+<span class="fc" id="L1466">            return new Date();</span>
+        }
+<span class="fc" id="L1468">        return new Date(this.sentDate.getTime());</span>
+    }
+
+    /**
+     * Gets the subject of the email.
+     *
+     * @return email subject
+     */
+    public String getSubject()
+    {
+<span class="nc" id="L1478">        return this.subject;</span>
+    }
+
+    /**
+     * Gets the sender of the email.
+     *
+     * @return from address
+     */
+    public InternetAddress getFromAddress()
+    {
+<span class="fc" id="L1488">        return this.fromAddress;</span>
+    }
+
+    /**
+     * Gets the host name of the SMTP server,
+     *
+     * @return host name
+     */
+    public String getHostName()
+    {
+<span class="fc bfc" id="L1498" title="All 2 branches covered.">        if (this.session != null)</span>
+        {
+<span class="fc" id="L1500">            return this.session.getProperty(MAIL_HOST);</span>
+        }
+<span class="fc bfc" id="L1502" title="All 2 branches covered.">        else if (EmailUtils.isNotEmpty(this.hostName))</span>
+        {
+<span class="fc" id="L1504">            return this.hostName;</span>
+        }
+<span class="fc" id="L1506">        return null;</span>
+    }
+
+    /**
+     * Gets the listening port of the SMTP server.
+     *
+     * @return smtp port
+     */
+    public String getSmtpPort()
+    {
+<span class="nc bnc" id="L1516" title="All 2 branches missed.">        if (this.session != null)</span>
+        {
+<span class="nc" id="L1518">            return this.session.getProperty(MAIL_PORT);</span>
+        }
+<span class="nc bnc" id="L1520" title="All 2 branches missed.">        else if (EmailUtils.isNotEmpty(this.smtpPort))</span>
+        {
+<span class="nc" id="L1522">            return this.smtpPort;</span>
+        }
+<span class="nc" id="L1524">        return null;</span>
+    }
+
+    /**
+     * Gets whether the client is configured to require STARTTLS.
+     *
+     * @return true if using STARTTLS for authentication, false otherwise
+     * @since 1.3
+     */
+    public boolean isStartTLSRequired()
+    {
+<span class="fc" id="L1535">        return this.startTlsRequired;</span>
+    }
+
+    /**
+     * Gets whether the client is configured to try to enable STARTTLS.
+     *
+     * @return true if using STARTTLS for authentication, false otherwise
+     * @since 1.3
+     */
+    public boolean isStartTLSEnabled()
+    {
+<span class="pc bpc" id="L1546" title="2 of 4 branches missed.">        return this.startTlsEnabled || tls;</span>
+    }
+
+    /**
+     * Gets whether the client is configured to try to enable STARTTLS.
+     * See EMAIL-105 for reason of deprecation.
+     *
+     * @deprecated since 1.3, use isStartTLSEnabled() instead
+     * @return true if using STARTTLS for authentication, false otherwise
+     * @since 1.1
+     */
+    @Deprecated
+    public boolean isTLS()
+    {
+<span class="nc" id="L1560">        return isStartTLSEnabled();</span>
+    }
+
+    /**
+     * Utility to copy List of known InternetAddress objects into an
+     * array.
+     *
+     * @param list A List.
+     * @return An InternetAddress[].
+     * @since 1.0
+     */
+    protected InternetAddress[] toInternetAddressArray(List&lt;InternetAddress&gt; list)
+    {
+<span class="fc" id="L1573">        return list.toArray(new InternetAddress[list.size()]);</span>
+    }
+
+    /**
+     * Set details regarding &quot;pop3 before smtp&quot; authentication.
+     *
+     * @param newPopBeforeSmtp Whether or not to log into pop3 server before sending mail.
+     * @param newPopHost The pop3 host to use.
+     * @param newPopUsername The pop3 username.
+     * @param newPopPassword The pop3 password.
+     * @since 1.0
+     */
+    public void setPopBeforeSmtp(
+        boolean newPopBeforeSmtp,
+        String newPopHost,
+        String newPopUsername,
+        String newPopPassword)
+    {
+<span class="nc" id="L1591">        this.popBeforeSmtp = newPopBeforeSmtp;</span>
+<span class="nc" id="L1592">        this.popHost = newPopHost;</span>
+<span class="nc" id="L1593">        this.popUsername = newPopUsername;</span>
+<span class="nc" id="L1594">        this.popPassword = newPopPassword;</span>
+<span class="nc" id="L1595">    }</span>
+
+    /**
+     * Returns whether SSL/TLS encryption for the transport is currently enabled (SMTPS/POPS).
+     * See EMAIL-105 for reason of deprecation.
+     *
+     * @deprecated since 1.3, use isSSLOnConnect() instead
+     * @return true if SSL enabled for the transport
+     */
+    @Deprecated
+    public boolean isSSL()
+    {
+<span class="nc" id="L1607">        return isSSLOnConnect();</span>
+    }
+
+    /**
+     * Returns whether SSL/TLS encryption for the transport is currently enabled (SMTPS/POPS).
+     *
+     * @return true if SSL enabled for the transport
+     * @since 1.3
+     */
+    public boolean isSSLOnConnect()
+    {
+<span class="pc bpc" id="L1618" title="1 of 4 branches missed.">        return sslOnConnect || ssl;</span>
+    }
+
+    /**
+     * Sets whether SSL/TLS encryption should be enabled for the SMTP transport upon connection (SMTPS/POPS).
+     * See EMAIL-105 for reason of deprecation.
+     *
+     * @deprecated since 1.3, use setSSLOnConnect() instead
+     * @param ssl whether to enable the SSL transport
+     */
+    @Deprecated
+    public void setSSL(boolean ssl)
+    {
+<span class="nc" id="L1631">        setSSLOnConnect(ssl);</span>
+<span class="nc" id="L1632">    }</span>
+
+    /**
+     * Sets whether SSL/TLS encryption should be enabled for the SMTP transport upon connection (SMTPS/POPS).
+     *
+     * @param ssl whether to enable the SSL transport
+     * @return An Email.
+     * @since 1.3
+     */
+    public Email setSSLOnConnect(boolean ssl)
+    {
+<span class="fc" id="L1643">        checkSessionAlreadyInitialized();</span>
+<span class="fc" id="L1644">        this.sslOnConnect = ssl;</span>
+<span class="fc" id="L1645">        this.ssl = ssl;</span>
+<span class="fc" id="L1646">        return this;</span>
+    }
+
+    /**
+    * Is the server identity checked as specified by RFC 2595
+    *
+    * @return true if the server identity is checked
+    * @since 1.3
+    */
+    public boolean isSSLCheckServerIdentity()
+    {
+<span class="fc" id="L1657">        return sslCheckServerIdentity;</span>
+    }
+
+    /**
+     * Sets whether the server identity is checked as specified by RFC 2595
+     *
+     * @param sslCheckServerIdentity whether to enable server identity check
+     * @return An Email.
+     * @since 1.3
+     */
+    public Email setSSLCheckServerIdentity(boolean sslCheckServerIdentity)
+    {
+<span class="nc" id="L1669">        checkSessionAlreadyInitialized();</span>
+<span class="nc" id="L1670">        this.sslCheckServerIdentity = sslCheckServerIdentity;</span>
+<span class="nc" id="L1671">        return this;</span>
+    }
+
+    /**
+     * Returns the current SSL port used by the SMTP transport.
+     *
+     * @return the current SSL port used by the SMTP transport
+     */
+    public String getSslSmtpPort()
+    {
+<span class="nc bnc" id="L1681" title="All 2 branches missed.">        if (this.session != null)</span>
+        {
+<span class="nc" id="L1683">            return this.session.getProperty(MAIL_SMTP_SOCKET_FACTORY_PORT);</span>
+        }
+<span class="nc bnc" id="L1685" title="All 2 branches missed.">        else if (EmailUtils.isNotEmpty(this.sslSmtpPort))</span>
+        {
+<span class="nc" id="L1687">            return this.sslSmtpPort;</span>
+        }
+<span class="nc" id="L1689">        return null;</span>
+    }
+
+    /**
+     * Sets the SSL port to use for the SMTP transport. Defaults to the standard
+     * port, 465.
+     *
+     * @param sslSmtpPort the SSL port to use for the SMTP transport
+     */
+    public void setSslSmtpPort(String sslSmtpPort)
+    {
+<span class="nc" id="L1700">        checkSessionAlreadyInitialized();</span>
+<span class="nc" id="L1701">        this.sslSmtpPort = sslSmtpPort;</span>
+<span class="nc" id="L1702">    }</span>
+
+    /**
+    * If partial sending of email enabled.
+    *
+    * @return true if sending partial email is enabled
+    * @since 1.3.2
+    */
+    public boolean isSendPartial()
+    {
+<span class="fc" id="L1712">        return sendPartial;</span>
+    }
+
+    /**
+     * Sets whether the email is partially send in case of invalid addresses.
+     * &lt;p&gt;
+     * In case the mail server rejects an address as invalid, the call to {@link #send()}
+     * may throw a {@link javax.mail.SendFailedException}, even if partial send mode is enabled (emails
+     * to valid addresses will be transmitted). In case the email server does not reject
+     * invalid addresses immediately, but return a bounce message, no exception will be thrown
+     * by the {@link #send()} method.
+     *
+     * @param sendPartial whether to enable partial send mode
+     * @return An Email.
+     * @since 1.3.2
+     */
+    public Email setSendPartial(boolean sendPartial)
+    {
+<span class="nc" id="L1730">        checkSessionAlreadyInitialized();</span>
+<span class="nc" id="L1731">        this.sendPartial = sendPartial;</span>
+<span class="nc" id="L1732">        return this;</span>
+    }
+
+    /**
+     * Get the list of &quot;To&quot; addresses.
+     *
+     * @return List addresses
+     */
+    public List&lt;InternetAddress&gt; getToAddresses()
+    {
+<span class="nc" id="L1742">        return this.toList;</span>
+    }
+
+    /**
+     * Get the list of &quot;CC&quot; addresses.
+     *
+     * @return List addresses
+     */
+    public List&lt;InternetAddress&gt; getCcAddresses()
+    {
+<span class="fc" id="L1752">        return this.ccList;</span>
+    }
+
+    /**
+     * Get the list of &quot;Bcc&quot; addresses.
+     *
+     * @return List addresses
+     */
+    public List&lt;InternetAddress&gt; getBccAddresses()
+    {
+<span class="fc" id="L1762">        return this.bccList;</span>
+    }
+
+    /**
+     * Get the list of &quot;Reply-To&quot; addresses.
+     *
+     * @return List addresses
+     */
+    public List&lt;InternetAddress&gt; getReplyToAddresses()
+    {
+<span class="fc" id="L1772">        return this.replyList;</span>
+    }
+
+    /**
+     * Get the socket connection timeout value in milliseconds.
+     *
+     * @return the timeout in milliseconds.
+     * @since 1.2
+     */
+    public int getSocketConnectionTimeout()
+    {
+<span class="fc" id="L1783">        return this.socketConnectionTimeout;</span>
+    }
+
+    /**
+     * Set the socket connection timeout value in milliseconds.
+     * Default is a 60 second timeout.
+     *
+     * @param socketConnectionTimeout the connection timeout
+     * @since 1.2
+     */
+    public void setSocketConnectionTimeout(int socketConnectionTimeout)
+    {
+<span class="fc" id="L1795">        checkSessionAlreadyInitialized();</span>
+<span class="fc" id="L1796">        this.socketConnectionTimeout = socketConnectionTimeout;</span>
+<span class="fc" id="L1797">    }</span>
+
+    /**
+     * Get the socket I/O timeout value in milliseconds.
+     *
+     * @return the socket I/O timeout
+     * @since 1.2
+     */
+    public int getSocketTimeout()
+    {
+<span class="nc" id="L1807">        return this.socketTimeout;</span>
+    }
+
+    /**
+     * Set the socket I/O timeout value in milliseconds.
+     * Default is 60 second timeout.
+     *
+     * @param socketTimeout the socket I/O timeout
+     * @since 1.2
+     */
+    public void setSocketTimeout(int socketTimeout)
+    {
+<span class="fc" id="L1819">        checkSessionAlreadyInitialized();</span>
+<span class="fc" id="L1820">        this.socketTimeout = socketTimeout;</span>
+<span class="fc" id="L1821">    }</span>
+
+    /**
+     * Factory method to create a customized MimeMessage which can be
+     * implemented by a derived class, e.g. to set the message id.
+     *
+     * @param aSession mail session to be used
+     * @return the newly created message
+     */
+    protected MimeMessage createMimeMessage(Session aSession)
+    {
+<span class="fc" id="L1832">        return new MimeMessage(aSession);</span>
+    }
+
+    /**
+     * Create a folded header value containing 76 character chunks.
+     *
+     * @param name the name of the header
+     * @param value the value of the header
+     * @return the folded header value
+     * @throws IllegalArgumentException if either the name or value is null or empty
+     */
+    private String createFoldedHeaderValue(String name, Object value)
+    {
+        String result;
+
+<span class="pc bpc" id="L1847" title="1 of 2 branches missed.">        if (EmailUtils.isEmpty(name))</span>
+        {
+<span class="nc" id="L1849">            throw new IllegalArgumentException(&quot;name can not be null or empty&quot;);</span>
+        }
+<span class="pc bpc" id="L1851" title="2 of 4 branches missed.">        if (value == null || EmailUtils.isEmpty(value.toString()))</span>
+        {
+<span class="nc" id="L1853">            throw new IllegalArgumentException(&quot;value can not be null or empty&quot;);</span>
+        }
+
+        try
+        {
+<span class="fc" id="L1858">            result = MimeUtility.fold(name.length() + 2, MimeUtility.encodeText(value.toString(), this.charset, null));</span>
+        }
+<span class="nc" id="L1860">        catch (UnsupportedEncodingException e)</span>
+        {
+<span class="nc" id="L1862">            result = value.toString();</span>
+<span class="fc" id="L1863">        }</span>
+
+<span class="fc" id="L1865">        return result;</span>
+    }
+
+    /**
+     * Creates a InternetAddress.
+     *
+     * @param email An email address.
+     * @param name A name.
+     * @param charsetName The name of the charset to encode the name with.
+     * @return An internet address.
+     * @throws EmailException Thrown when the supplied address, name or charset were invalid.
+     */
+    private InternetAddress createInternetAddress(String email, String name, String charsetName)
+        throws EmailException
+    {
+<span class="fc" id="L1880">        InternetAddress address = null;</span>
+
+        try
+        {
+<span class="fc" id="L1884">            address = new InternetAddress(email);</span>
+
+            // check name input
+<span class="fc bfc" id="L1887" title="All 2 branches covered.">            if (EmailUtils.isNotEmpty(name))</span>
+            {
+                // check charset input.
+<span class="pc bpc" id="L1890" title="1 of 2 branches missed.">                if (EmailUtils.isEmpty(charsetName))</span>
+                {
+<span class="fc" id="L1892">                    address.setPersonal(name);</span>
+                }
+                else
+                {
+                    // canonicalize the charset name and make sure
+                    // the current platform supports it.
+<span class="nc" id="L1898">                    Charset set = Charset.forName(charsetName);</span>
+<span class="nc" id="L1899">                    address.setPersonal(name, set.name());</span>
+                }
+            }
+
+            // run sanity check on new InternetAddress object; if this fails
+            // it will throw AddressException.
+<span class="fc" id="L1905">            address.validate();</span>
+        }
+<span class="nc" id="L1907">        catch (AddressException e)</span>
+        {
+<span class="nc" id="L1909">            throw new EmailException(e);</span>
+        }
+<span class="nc" id="L1911">        catch (UnsupportedEncodingException e)</span>
+        {
+<span class="nc" id="L1913">            throw new EmailException(e);</span>
+<span class="fc" id="L1914">        }</span>
+<span class="fc" id="L1915">        return address;</span>
+    }
+
+    /**
+     * When a mail session is already initialized setting the
+     * session properties has no effect. In order to flag the
+     * problem throw an IllegalStateException.
+     *
+     * @throws IllegalStateException when the mail session is already initialized
+     */
+    private void checkSessionAlreadyInitialized()
+    {
+<span class="pc bpc" id="L1927" title="1 of 2 branches missed.">        if (this.session != null)</span>
+        {
+<span class="nc" id="L1929">            throw new IllegalStateException(&quot;The mail session is already initialized&quot;);</span>
+        }
+<span class="fc" id="L1931">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

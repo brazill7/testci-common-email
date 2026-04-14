@@ -1,0 +1,19 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Commons Email,org.apache.commons.mail,DefaultAuthenticator,3,10,0,0,1,3,1,1,1,1
+Commons Email,org.apache.commons.mail,MultiPartEmail,443,0,34,0,127,0,40,0,23,0
+Commons Email,org.apache.commons.mail,ImageHtmlEmail,149,0,12,0,40,0,12,0,6,0
+Commons Email,org.apache.commons.mail,EmailException,46,4,0,0,18,2,6,1,6,1
+Commons Email,org.apache.commons.mail,HtmlEmail,596,0,48,0,135,0,36,0,12,0
+Commons Email,org.apache.commons.mail,EmailAttachment,50,0,0,0,20,0,11,0,11,0
+Commons Email,org.apache.commons.mail,ByteArrayDataSource,168,0,16,0,51,0,17,0,9,0
+Commons Email,org.apache.commons.mail,HtmlEmail.InlineImage,44,0,4,0,15,0,8,0,6,0
+Commons Email,org.apache.commons.mail,EmailUtils,189,97,44,14,41,25,27,10,4,4
+Commons Email,org.apache.commons.mail,SimpleEmail,17,0,2,0,5,0,3,0,2,0
+Commons Email,org.apache.commons.mail,Email,475,905,73,93,119,215,77,85,26,53
+Commons Email,org.apache.commons.mail.util,MimeMessageUtils,108,0,12,0,32,0,11,0,5,0
+Commons Email,org.apache.commons.mail.util,MimeMessageParser,338,0,52,0,78,0,48,0,22,0
+Commons Email,org.apache.commons.mail.resolver,DataSourceFileResolver,86,0,10,0,21,0,11,0,6,0
+Commons Email,org.apache.commons.mail.resolver,DataSourceClassPathResolver,131,0,14,0,30,0,14,0,7,0
+Commons Email,org.apache.commons.mail.resolver,DataSourceBaseResolver,35,0,4,0,10,0,8,0,6,0
+Commons Email,org.apache.commons.mail.resolver,DataSourceUrlResolver,90,0,14,0,25,0,13,0,6,0
+Commons Email,org.apache.commons.mail.resolver,DataSourceCompositeResolver,112,0,10,0,23,0,10,0,5,0

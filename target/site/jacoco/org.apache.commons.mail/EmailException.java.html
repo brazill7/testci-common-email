@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Commons Email</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.mail</a> &gt; <span class="el_source">EmailException.java</span></div><h1>EmailException.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.mail;
+
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
+/**
+ * Exception thrown when a checked error occurs in commons-email.
+ * &lt;p&gt;
+ * Adapted from FunctorException in Commons Collections.
+ * &lt;p&gt;
+ * Emulation support for nested exceptions has been removed in {@code Email 1.3},
+ * supported by JDK &amp;ge; 1.4.
+ *
+ * @since 1.0
+ * @version $Id: EmailException.java 1459997 2013-03-22 21:23:15Z tn $
+ */
+public class EmailException
+        extends Exception
+{
+    /** Serializable version identifier. */
+    private static final long serialVersionUID = 5550674499282474616L;
+
+    /**
+     * Constructs a new &lt;code&gt;EmailException&lt;/code&gt; with no
+     * detail message.
+     */
+    public EmailException()
+    {
+<span class="nc" id="L46">        super();</span>
+<span class="nc" id="L47">    }</span>
+
+    /**
+     * Constructs a new &lt;code&gt;EmailException&lt;/code&gt; with specified
+     * detail message.
+     *
+     * @param msg  the error message.
+     */
+    public EmailException(String msg)
+    {
+<span class="fc" id="L57">        super(msg);</span>
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * Constructs a new &lt;code&gt;EmailException&lt;/code&gt; with specified
+     * nested &lt;code&gt;Throwable&lt;/code&gt; root cause.
+     *
+     * @param rootCause  the exception or error that caused this exception
+     *                   to be thrown.
+     */
+    public EmailException(Throwable rootCause)
+    {
+<span class="nc" id="L69">        super(rootCause);</span>
+<span class="nc" id="L70">    }</span>
+
+    /**
+     * Constructs a new &lt;code&gt;EmailException&lt;/code&gt; with specified
+     * detail message and nested &lt;code&gt;Throwable&lt;/code&gt; root cause.
+     *
+     * @param msg  the error message.
+     * @param rootCause  the exception or error that caused this exception
+     *                   to be thrown.
+     */
+    public EmailException(String msg, Throwable rootCause)
+    {
+<span class="nc" id="L82">        super(msg, rootCause);</span>
+<span class="nc" id="L83">    }</span>
+
+    /**
+     * Prints the stack trace of this exception to the standard error stream.
+     */
+    @Override
+    public void printStackTrace()
+    {
+<span class="nc" id="L91">        printStackTrace(System.err);</span>
+<span class="nc" id="L92">    }</span>
+
+    /**
+     * Prints the stack trace of this exception to the specified stream.
+     *
+     * @param out  the &lt;code&gt;PrintStream&lt;/code&gt; to use for output
+     */
+    @Override
+    public void printStackTrace(PrintStream out)
+    {
+<span class="nc" id="L102">        synchronized (out)</span>
+        {
+<span class="nc" id="L104">            PrintWriter pw = new PrintWriter(out, false);</span>
+<span class="nc" id="L105">            printStackTrace(pw);</span>
+
+            // Flush the PrintWriter before it's GC'ed.
+<span class="nc" id="L108">            pw.flush();</span>
+<span class="nc" id="L109">        }</span>
+<span class="nc" id="L110">    }</span>
+
+    /**
+     * Prints the stack trace of this exception to the specified writer.
+     *
+     * @param out  the &lt;code&gt;PrintWriter&lt;/code&gt; to use for output
+     */
+    @Override
+    public void printStackTrace(PrintWriter out)
+    {
+<span class="nc" id="L120">        synchronized (out)</span>
+        {
+<span class="nc" id="L122">            super.printStackTrace(out);</span>
+<span class="nc" id="L123">        }</span>
+<span class="nc" id="L124">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

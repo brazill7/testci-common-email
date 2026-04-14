@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Commons Email</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.mail</a> &gt; <span class="el_source">EmailUtils.java</span></div><h1>EmailUtils.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.mail;
+
+import org.apache.commons.mail.util.MimeMessageUtils;
+
+import javax.mail.internet.MimeMessage;
+import javax.mail.MessagingException;
+
+import java.util.BitSet;
+import java.util.Random;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+/**
+ * Utility methods used by commons-email.
+ *
+ * &lt;p&gt;
+ * These methods are copied from other commons components (commons-lang) to avoid creating
+ * a dependency for such a small component.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * This is a package scoped class, and should not be used directly by users.
+ * &lt;/p&gt;
+ *
+ * @since 1.0
+ * @version $Id: EmailUtils.java 1510632 2013-08-05 18:10:31Z britter $
+ */
+final class EmailUtils
+{
+    /**
+     * Random object used by random method. This has to be not local to the random method
+     * so as to not return the same value in the same millisecond.
+     */
+<span class="fc" id="L52">    private static final Random RANDOM = new Random();</span>
+
+    /**
+     * The default charset used for URL encoding.
+     */
+    private static final String US_ASCII = &quot;US-ASCII&quot;;
+
+    /**
+     * Radix used in encoding.
+     */
+    private static final int RADIX = 16;
+
+    /**
+     * The escape character used for the URL encoding scheme.
+     */
+    private static final char ESCAPE_CHAR = '%';
+
+    /**
+     * BitSet of RFC 2392 safe URL characters.
+     */
+<span class="fc" id="L72">    private static final BitSet SAFE_URL = new BitSet(256);</span>
+
+    // Static initializer for safe_uri
+    static {
+        // alpha characters
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        for (int i = 'a'; i &lt;= 'z'; i++)</span>
+        {
+<span class="fc" id="L79">            SAFE_URL.set(i);</span>
+        }
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        for (int i = 'A'; i &lt;= 'Z'; i++)</span>
+        {
+<span class="fc" id="L83">            SAFE_URL.set(i);</span>
+        }
+        // numeric characters
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        for (int i = '0'; i &lt;= '9'; i++)</span>
+        {
+<span class="fc" id="L88">            SAFE_URL.set(i);</span>
+        }
+
+        // safe chars
+<span class="fc" id="L92">        SAFE_URL.set('-');</span>
+<span class="fc" id="L93">        SAFE_URL.set('_');</span>
+<span class="fc" id="L94">        SAFE_URL.set('.');</span>
+<span class="fc" id="L95">        SAFE_URL.set('*');</span>
+<span class="fc" id="L96">        SAFE_URL.set('+');</span>
+<span class="fc" id="L97">        SAFE_URL.set('$');</span>
+<span class="fc" id="L98">        SAFE_URL.set('!');</span>
+<span class="fc" id="L99">        SAFE_URL.set('\'');</span>
+<span class="fc" id="L100">        SAFE_URL.set('(');</span>
+<span class="fc" id="L101">        SAFE_URL.set(')');</span>
+<span class="fc" id="L102">        SAFE_URL.set(',');</span>
+<span class="fc" id="L103">        SAFE_URL.set('@');</span>
+<span class="fc" id="L104">    }</span>
+
+    /**
+     * Constructs a new &lt;code&gt;EmailException&lt;/code&gt; with no detail message.
+     */
+    private EmailUtils()
+    {
+        super();
+    }
+
+    /**
+     * Checks if a String is empty (&quot;&quot;) or null.
+     *
+     * @param str the String to check, may be null
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if the String is empty or null
+     *
+     * @since Commons Lang v2.1, svn 240418
+     */
+    static boolean isEmpty(String str)
+    {
+<span class="fc bfc" id="L125" title="All 4 branches covered.">        return (str == null) || (str.length() == 0);</span>
+    }
+
+    /**
+     * Checks if a String is not empty (&quot;&quot;) and not null.
+     *
+     * @param str the String to check, may be null
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if the String is not empty and not null
+     *
+     * @since Commons Lang v2.1, svn 240418
+     */
+    static boolean isNotEmpty(String str)
+    {
+<span class="pc bpc" id="L139" title="1 of 4 branches missed.">        return (str != null) &amp;&amp; (str.length() &gt; 0);</span>
+    }
+
+    /**
+     * Validate an argument, throwing &lt;code&gt;IllegalArgumentException&lt;/code&gt;
+     * if the argument is &lt;code&gt;null&lt;/code&gt;.
+     *
+     * @param object the object to check is not &lt;code&gt;null&lt;/code&gt;
+     * @param message the exception message you would like to see if the object is &lt;code&gt;null&lt;/code&gt;
+     *
+     * @throws IllegalArgumentException if the object is &lt;code&gt;null&lt;/code&gt;
+     *
+     * @since Commons Lang v2.1, svn 201930
+     */
+    static void notNull(Object object, String message)
+    {
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if (object == null)</span>
+        {
+<span class="nc" id="L157">            throw new IllegalArgumentException(message);</span>
+        }
+<span class="fc" id="L159">    }</span>
+
+    /**
+     * Creates a random string whose length is the number of characters specified.
+     *
+     * &lt;p&gt;
+     * Characters will be chosen from the set of alphabetic characters.
+     * &lt;/p&gt;
+     *
+     * @param count the length of random string to create
+     *
+     * @return the random string
+     *
+     * @since Commons Lang v2.1, svn 201930
+     */
+    static String randomAlphabetic(int count)
+    {
+<span class="nc" id="L176">        return random(count, 0, 0, true, false, null, RANDOM);</span>
+    }
+
+    /**
+     * Creates a random string based on a variety of options, using supplied source of randomness.
+     *
+     * &lt;p&gt;
+     * If start and end are both &lt;code&gt;0&lt;/code&gt;, start and end are set to &lt;code&gt;' '&lt;/code&gt; and &lt;code&gt;'z'&lt;/code&gt;,
+     * the ASCII printable characters, will be used, unless letters and numbers are both &lt;code&gt;false&lt;/code&gt;,
+     * in which case, start and end are set to &lt;code&gt;0&lt;/code&gt; and &lt;code&gt;Integer.MAX_VALUE&lt;/code&gt;.
+     * &lt;/p&gt;
+     *
+     * &lt;p&gt;
+     * If set is not &lt;code&gt;null&lt;/code&gt;, characters between start and end are chosen.
+     * &lt;/p&gt;
+     *
+     * &lt;p&gt;
+     * This method accepts a user-supplied {@link Random} instance to use as a source of randomness. By seeding a
+     * single {@link Random} instance with a fixed seed and using it for each call, the same random sequence of strings
+     * can be generated repeatedly and predictably.
+     * &lt;/p&gt;
+     *
+     * @param count the length of random string to create
+     * @param start the position in set of chars to start at
+     * @param end the position in set of chars to end before
+     * @param letters only allow letters?
+     * @param numbers only allow numbers?
+     * @param chars the set of chars to choose randoms from. If &lt;code&gt;null&lt;/code&gt;,
+     *              then it will use the set of all chars.
+     * @param random a source of randomness.
+     *
+     * @return the random string
+     *
+     * @throws IllegalArgumentException if &lt;code&gt;count&lt;/code&gt; &amp;lt; 0.
+     *
+     * @since Commons Lang v2.1, svn 201930
+     */
+    private static String random(
+        int count,
+        int start,
+        int end,
+        boolean letters,
+        boolean numbers,
+        char [] chars,
+        Random random)
+    {
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (count == 0)</span>
+        {
+<span class="nc" id="L224">            return &quot;&quot;;</span>
+        }
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        else if (count &lt; 0)</span>
+        {
+<span class="nc" id="L228">            throw new IllegalArgumentException(&quot;Requested random string length &quot; + count + &quot; is less than 0.&quot;);</span>
+        }
+
+<span class="nc bnc" id="L231" title="All 4 branches missed.">        if ((start == 0) &amp;&amp; (end == 0))</span>
+        {
+<span class="nc" id="L233">            end = 'z' + 1;</span>
+<span class="nc" id="L234">            start = ' ';</span>
+
+<span class="nc bnc" id="L236" title="All 4 branches missed.">            if (!letters &amp;&amp; !numbers)</span>
+            {
+<span class="nc" id="L238">                start = 0;</span>
+<span class="nc" id="L239">                end = Integer.MAX_VALUE;</span>
+            }
+        }
+
+<span class="nc" id="L243">        StringBuffer buffer = new StringBuffer();</span>
+<span class="nc" id="L244">        int gap = end - start;</span>
+
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        while (count-- != 0)</span>
+        {
+            char ch;
+
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            if (chars == null)</span>
+            {
+<span class="nc" id="L252">                ch = (char) (random.nextInt(gap) + start);</span>
+            }
+            else
+            {
+<span class="nc" id="L256">                ch = chars[random.nextInt(gap) + start];</span>
+            }
+
+<span class="nc bnc" id="L259" title="All 12 branches missed.">            if ((letters &amp;&amp; numbers &amp;&amp; Character.isLetterOrDigit(ch)) || (letters &amp;&amp; Character.isLetter(ch))</span>
+<span class="nc bnc" id="L260" title="All 6 branches missed.">                            || (numbers &amp;&amp; Character.isDigit(ch)) || (!letters &amp;&amp; !numbers))</span>
+            {
+<span class="nc" id="L262">                buffer.append(ch);</span>
+            }
+            else
+            {
+<span class="nc" id="L266">                count++;</span>
+            }
+<span class="nc" id="L268">        }</span>
+
+<span class="nc" id="L270">        return buffer.toString();</span>
+    }
+
+    /**
+     * Encodes an input string according to RFC 2392. Unsafe characters are escaped.
+     *
+     * @param input the input string to be URL encoded
+     * @return a URL encoded string
+     * @throws UnsupportedEncodingException if &quot;US-ASCII&quot; charset is not available
+     * @see &lt;a href=&quot;http://tools.ietf.org/html/rfc2392&quot;&gt;RFC 2392&lt;/a&gt;
+     */
+    static String encodeUrl(final String input) throws UnsupportedEncodingException
+    {
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        if (input == null)</span>
+        {
+<span class="nc" id="L285">            return null;</span>
+        }
+
+<span class="nc" id="L288">        final StringBuilder builder = new StringBuilder();</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        for (byte c : input.getBytes(US_ASCII))</span>
+        {
+<span class="nc" id="L291">            int b = c;</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">            if (b &lt; 0)</span>
+            {
+<span class="nc" id="L294">                b = 256 + b;</span>
+            }
+<span class="nc bnc" id="L296" title="All 2 branches missed.">            if (SAFE_URL.get(b))</span>
+            {
+<span class="nc" id="L298">                builder.append((char) b);</span>
+            }
+            else
+            {
+<span class="nc" id="L302">                builder.append(ESCAPE_CHAR);</span>
+<span class="nc" id="L303">                char hex1 = Character.toUpperCase(Character.forDigit((b &gt;&gt; 4) &amp; 0xF, RADIX));</span>
+<span class="nc" id="L304">                char hex2 = Character.toUpperCase(Character.forDigit(b &amp; 0xF, RADIX));</span>
+<span class="nc" id="L305">                builder.append(hex1);</span>
+<span class="nc" id="L306">                builder.append(hex2);</span>
+            }
+        }
+<span class="nc" id="L309">        return builder.toString();</span>
+    }
+
+    /**
+     * Convenience method to write a MimeMessage into a file.
+     *
+     * @param resultFile the file containing the MimeMessgae
+     * @param mimeMessage the MimeMessage to write
+     * @throws IOException writing the MimeMessage failed
+     * @throws MessagingException writing the MimeMessage failed
+     */
+    static void writeMimeMessage(File resultFile, MimeMessage mimeMessage) throws IOException, MessagingException
+    {
+<span class="nc" id="L322">        MimeMessageUtils.writeMimeMessage(mimeMessage, resultFile);</span>
+<span class="nc" id="L323">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

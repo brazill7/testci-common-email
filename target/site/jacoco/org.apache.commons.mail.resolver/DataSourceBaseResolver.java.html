@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataSourceBaseResolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Commons Email</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.mail.resolver</a> &gt; <span class="el_source">DataSourceBaseResolver.java</span></div><h1>DataSourceBaseResolver.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.mail.resolver;
+
+import org.apache.commons.mail.DataSourceResolver;
+
+/**
+ * Base class for various resolvers.
+ *
+ * @since 1.3
+ * @version $Id: DataSourceBaseResolver.java 1420381 2012-12-11 20:18:05Z tn $
+ */
+public abstract class DataSourceBaseResolver implements DataSourceResolver
+{
+    /** shall we ignore resources not found or complain with an exception */
+    private final boolean lenient;
+
+    /**
+     * Constructor.
+     */
+    public DataSourceBaseResolver()
+<span class="nc" id="L36">    {</span>
+<span class="nc" id="L37">        this.lenient = false;</span>
+<span class="nc" id="L38">    }</span>
+
+    /**
+     * Constructor.
+     *
+     * @param lenient shall we ignore resources not found or throw an exception?
+     */
+    public DataSourceBaseResolver(final boolean lenient)
+<span class="nc" id="L46">    {</span>
+<span class="nc" id="L47">        this.lenient = lenient;</span>
+<span class="nc" id="L48">    }</span>
+
+    /**
+     * Shall we ignore resources not found or throw an exception?
+     *
+     * @return the lenient flag
+     */
+    public boolean isLenient()
+    {
+<span class="nc" id="L57">        return lenient;</span>
+    }
+
+    /**
+     * Is this a content id?
+     *
+     * @param resourceLocation the resource location
+     * @return true if it is a CID
+     */
+    protected boolean isCid(final String resourceLocation)
+    {
+<span class="nc" id="L68">        return resourceLocation.startsWith(&quot;cid:&quot;);</span>
+    }
+
+    /**
+     * Is this a file URL?
+     *
+     * @param urlString the URL string
+     * @return true if it is a file URL
+     */
+    protected boolean isFileUrl(final String urlString)
+    {
+<span class="nc" id="L79">        return urlString.startsWith(&quot;file:/&quot;);</span>
+    }
+
+    /**
+     * Is this a HTTP/HTTPS URL?
+     *
+     * @param urlString the URL string
+     * @return true if it is a HTTP/HTTPS URL
+     */
+    protected boolean isHttpUrl(final String urlString)
+    {
+<span class="nc bnc" id="L90" title="All 4 branches missed.">        return urlString.startsWith(&quot;http://&quot;) || urlString.startsWith(&quot;https://&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
